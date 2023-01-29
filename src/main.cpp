@@ -3,6 +3,8 @@
 #include "glad/gl.h"
 #include "GLFW/glfw3.h"
 
+#include "icosphere.hpp"
+
 void ErrorCallback(int error_code, const char *message)
 {
     std::cout << "ERROR: " << message << "\nERROR CODE: " << error_code << std::endl;
@@ -52,6 +54,8 @@ int main()
     glViewport(0, 0, width, height);
     glEnable(GL_DEPTH_TEST);
 
+    Icosphere::GenerateIcosphere();
+
     while (!glfwWindowShouldClose(window))
     {
         glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
@@ -60,6 +64,6 @@ int main()
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
-
+    
     glfwTerminate();
 }
