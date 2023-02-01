@@ -2,6 +2,7 @@
 #include <unordered_map>
 #include "glm/vec3.hpp"
 #include "glm/geometric.hpp"
+#include "glad/gl.h"
 
 #include "icosphere.hpp"
 
@@ -111,7 +112,7 @@ void Icosphere::GenerateIcosphere(unsigned int depth /*= 0*/)
     for (int i = 0; i < depth; i++)
     {
         std::vector<unsigned int> new_triangles;
-        std::unordered_map<std::pair<unsigned int, unsigned int>, unsigned int> middle_points;
+        indices_map middle_points;
 
         for (int j = 0; j < _triangles.size(); j += 3)
         {
@@ -127,4 +128,39 @@ void Icosphere::GenerateIcosphere(unsigned int depth /*= 0*/)
 
         _triangles = new_triangles;
     }
+}
+
+void Icosphere::SetUpRendering(const glm::vec3 &default_color)
+{
+    _colors.resize(_vertices.size(), default_color);
+
+    glGenVertexArrays(1, &_VAO);
+    glGenBuffers(1, &_VBO);
+    glGenBuffers(1, &_EBO);
+
+    glBindVertexArray(_VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, _VBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);
+
+    std::size_t vertices_size = _vertices.size() * sizeof(glm::vec3);
+    std::size_t triangles_size = _triangles.size() * sizeof(unsigned int);
+    glBufferData(GL_ARRAY_BUFFER, vertices_size * 2, _vertices.data(), GL_STATIC_DRAW);
+    glBufferSubData(GL_ARRAY_BUFFER, vertices_size, vertices_size, _colors.data());
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, triangles_size, _triangles.data(), GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), 0);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)vertices_size);
+
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
+void Icosphere::Render()
+{
+    glBindVertexArray(_VAO);
+    glDrawElements(GL_TRIANGLES, _triangles.size(), GL_UNSIGNED_INT, 0);
+    glBindVertexArray(0);
 }

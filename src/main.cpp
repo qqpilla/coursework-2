@@ -4,6 +4,7 @@
 #include "GLFW/glfw3.h"
 
 #include "icosphere.hpp"
+#include "shader_program.hpp"
 
 void ErrorCallback(int error_code, const char *message)
 {
@@ -55,11 +56,17 @@ int main()
     glEnable(GL_DEPTH_TEST);
 
     Icosphere::GenerateIcosphere();
+    Icosphere::SetUpRendering(glm::vec3(0.2f, 0.2f, 0.2f));
+
+    ShaderProgram shp("../shaders/icosphere.vert", "../shaders/icosphere.frag");
+    glUseProgram(shp.ID());
 
     while (!glfwWindowShouldClose(window))
     {
-        glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+        glClearColor(0.65f, 0.65f, 0.65f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        Icosphere::Render();
 
         glfwSwapBuffers(window);
         glfwPollEvents();
