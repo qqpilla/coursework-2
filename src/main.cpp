@@ -2,9 +2,13 @@
 
 #include "glad/gl.h"
 #include "GLFW/glfw3.h"
+#include "glm/gtc/type_ptr.hpp"
 
 #include "icosphere.hpp"
 #include "shader_program.hpp"
+#include "camera.hpp"
+
+static unsigned int clip_matrix_loc;
 
 void ErrorCallback(int error_code, const char *message)
 {
@@ -54,12 +58,17 @@ int main()
 
     glViewport(0, 0, width, height);
     glEnable(GL_DEPTH_TEST);
+    Camera::UpdateProjectionMatrix(width, height);
 
     Icosphere::GenerateIcosphere();
     Icosphere::SetUpRendering(glm::vec3(0.2f, 0.2f, 0.2f));
 
-    ShaderProgram shp("../shaders/icosphere.vert", "../shaders/icosphere.frag");
-    glUseProgram(shp.ID());
+    ShaderProgram icosphere_shader("../shaders/icosphere.vert", "../shaders/icosphere.frag");
+    clip_matrix_loc = glGetUniformLocation(icosphere_shader.ID(), "u_clip_matrix");
+
+    glUseProgram(icosphere_shader.ID());
+
+    glUniformMatrix4fv(clip_matrix_loc, 1, GL_FALSE, glm::value_ptr(Camera::ClipSpaceMatrix()));
 
     while (!glfwWindowShouldClose(window))
     {
