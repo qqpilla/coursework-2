@@ -8,7 +8,8 @@
 #include "shader_program.hpp"
 #include "camera.hpp"
 
-static unsigned int clip_matrix_loc;
+static bool clip_update_needed = true;
+float delta_time = 0.0f;
 
 void ErrorCallback(int error_code, const char *message)
 {
@@ -19,6 +20,47 @@ void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mods
 {
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, GL_TRUE);
+}
+
+static bool IsPressed(GLFWwindow *window, int key)
+{
+    bool pressed = glfwGetKey(window, key) == GLFW_PRESS;
+    clip_update_needed = clip_update_needed || pressed;
+    return pressed;
+}
+
+static void ProcessInput(GLFWwindow *window)
+{
+    if (IsPressed(window, GLFW_KEY_RIGHT))
+        Camera::Rotate(Camera::Move::RIGHT, Camera::Move::STAY);
+
+    if (IsPressed(window, GLFW_KEY_LEFT))
+        Camera::Rotate(Camera::Move::LEFT, Camera::Move::STAY);
+
+    if (IsPressed(window, GLFW_KEY_UP))
+    {
+        if (IsPressed(window, GLFW_KEY_LEFT_SHIFT) || IsPressed(window, GLFW_KEY_RIGHT_SHIFT))
+            Camera::Zoom(Camera::Move::IN);
+        else
+            Camera::Rotate(Camera::Move::STAY, Camera::Move::UP);
+    }
+
+    if (IsPressed(window, GLFW_KEY_DOWN))
+    {
+        if (IsPressed(window, GLFW_KEY_LEFT_SHIFT) || IsPressed(window, GLFW_KEY_RIGHT_SHIFT))
+            Camera::Zoom(Camera::Move::OUT);
+        else
+            Camera::Rotate(Camera::Move::STAY, Camera::Move::DOWN);
+    }
+}
+
+static void TryUpdateClip(unsigned int clip_matrix_loc)
+{
+    if (clip_update_needed)
+    {
+        glUniformMatrix4fv(clip_matrix_loc, 1, GL_FALSE, glm::value_ptr(Camera::ClipSpaceMatrix()));
+        clip_update_needed = false;
+    }
 }
 
 int main()
@@ -56,29 +98,39 @@ int main()
 
     glfwSetKeyCallback(window, KeyCallback);
 
+    glfwSwapInterval(1);
     glViewport(0, 0, width, height);
     glEnable(GL_DEPTH_TEST);
     Camera::UpdateProjectionMatrix(width, height);
 
-    Icosphere::GenerateIcosphere();
+    Icosphere::GenerateIcosphere(1);
     Icosphere::SetUpRendering(glm::vec3(0.2f, 0.2f, 0.2f));
 
     ShaderProgram icosphere_shader("../shaders/icosphere.vert", "../shaders/icosphere.frag");
-    clip_matrix_loc = glGetUniformLocation(icosphere_shader.ID(), "u_clip_matrix");
+    unsigned int clip_matrix_loc = glGetUniformLocation(icosphere_shader.ID(), "u_clip_matrix");
 
     glUseProgram(icosphere_shader.ID());
 
-    glUniformMatrix4fv(clip_matrix_loc, 1, GL_FALSE, glm::value_ptr(Camera::ClipSpaceMatrix()));
+    glEnable(GL_CULL_FACE);
+    glPolygonMode(GL_FRONT, GL_LINE);
 
+    double last_time = 0.0f;
     while (!glfwWindowShouldClose(window))
     {
         glClearColor(0.65f, 0.65f, 0.65f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         Icosphere::Render();
+        
+        ProcessInput(window);
+        glfwPollEvents();
+        TryUpdateClip(clip_matrix_loc);
 
         glfwSwapBuffers(window);
-        glfwPollEvents();
+
+        double now = glfwGetTime();
+        delta_time = now - last_time;
+        last_time = now;
     }
     
     glfwTerminate();
