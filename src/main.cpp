@@ -22,6 +22,15 @@ void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mods
         glfwSetWindowShouldClose(window, GL_TRUE);
 }
 
+void ScrollCallback(GLFWwindow *window, double x_offset, double y_offset)
+{
+    if (y_offset == 0)
+        return;
+        
+    Camera::Zoom(y_offset > 0 ? Camera::Move::IN : Camera::Move::OUT);
+    clip_update_needed = true;
+}
+
 static bool IsPressed(GLFWwindow *window, int key)
 {
     bool pressed = glfwGetKey(window, key) == GLFW_PRESS;
@@ -97,6 +106,7 @@ int main()
     }
 
     glfwSetKeyCallback(window, KeyCallback);
+    glfwSetScrollCallback(window, ScrollCallback);
 
     glfwSwapInterval(1);
     glViewport(0, 0, width, height);
