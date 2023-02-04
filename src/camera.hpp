@@ -36,6 +36,6 @@ public:
 
     static glm::mat4 ClipSpaceMatrix();
     static void UpdateProjectionMatrix(unsigned int w_width, unsigned int w_height);
-    static void Rotate(Move yaw_direction, Move pitch_direction);
-    static void Zoom(Move zoom_direction);
+    static void Rotate(float yaw, float pitch);
+    static void Zoom(float zoom);
 };

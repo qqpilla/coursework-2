@@ -3,12 +3,15 @@
 #include "glad/gl.h"
 #include "GLFW/glfw3.h"
 #include "glm/gtc/type_ptr.hpp"
+#include "glm/vec2.hpp"
 
 #include "icosphere.hpp"
 #include "shader_program.hpp"
 #include "camera.hpp"
 
 static bool clip_update_needed = true;
+static glm::vec2 last_cursor_pos = glm::vec2(0.0, 0.0);
+
 float delta_time = 0.0f;
 
 void ErrorCallback(int error_code, const char *message)
@@ -26,9 +29,20 @@ void ScrollCallback(GLFWwindow *window, double x_offset, double y_offset)
 {
     if (y_offset == 0)
         return;
-        
-    Camera::Zoom(y_offset > 0 ? Camera::Move::IN : Camera::Move::OUT);
+
+    Camera::Zoom(y_offset > 0 ? int(Camera::Move::IN) : int(Camera::Move::OUT));
     clip_update_needed = true;
+}
+
+void CursorPosCallback(GLFWwindow *window, double x_pos, double y_pos)
+{
+    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
+    {
+        glm::vec2 move(-(x_pos - last_cursor_pos.x), y_pos - last_cursor_pos.y);
+        Camera::Rotate(move.x, move.y);
+        clip_update_needed = true;
+    }
+    last_cursor_pos = glm::vec2(x_pos, y_pos);
 }
 
 static bool IsPressed(GLFWwindow *window, int key)
@@ -41,25 +55,25 @@ static bool IsPressed(GLFWwindow *window, int key)
 static void ProcessInput(GLFWwindow *window)
 {
     if (IsPressed(window, GLFW_KEY_RIGHT))
-        Camera::Rotate(Camera::Move::RIGHT, Camera::Move::STAY);
+        Camera::Rotate(int(Camera::Move::RIGHT), int(Camera::Move::STAY));
 
     if (IsPressed(window, GLFW_KEY_LEFT))
-        Camera::Rotate(Camera::Move::LEFT, Camera::Move::STAY);
+        Camera::Rotate(int(Camera::Move::LEFT), int(Camera::Move::STAY));
 
     if (IsPressed(window, GLFW_KEY_UP))
     {
         if (IsPressed(window, GLFW_KEY_LEFT_SHIFT) || IsPressed(window, GLFW_KEY_RIGHT_SHIFT))
-            Camera::Zoom(Camera::Move::IN);
+            Camera::Zoom(int(Camera::Move::IN));
         else
-            Camera::Rotate(Camera::Move::STAY, Camera::Move::UP);
+            Camera::Rotate(int(Camera::Move::STAY), int(Camera::Move::UP));
     }
 
     if (IsPressed(window, GLFW_KEY_DOWN))
     {
         if (IsPressed(window, GLFW_KEY_LEFT_SHIFT) || IsPressed(window, GLFW_KEY_RIGHT_SHIFT))
-            Camera::Zoom(Camera::Move::OUT);
+            Camera::Zoom(int(Camera::Move::OUT));
         else
-            Camera::Rotate(Camera::Move::STAY, Camera::Move::DOWN);
+            Camera::Rotate(int(Camera::Move::STAY), int(Camera::Move::DOWN));
     }
 }
 
@@ -107,6 +121,7 @@ int main()
 
     glfwSetKeyCallback(window, KeyCallback);
     glfwSetScrollCallback(window, ScrollCallback);
+    glfwSetCursorPosCallback(window, CursorPosCallback);
 
     glfwSwapInterval(1);
     glViewport(0, 0, width, height);
