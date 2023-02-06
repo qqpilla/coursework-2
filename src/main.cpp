@@ -45,6 +45,13 @@ void CursorPosCallback(GLFWwindow *window, double x_pos, double y_pos)
     last_cursor_pos = glm::vec2(x_pos, y_pos);
 }
 
+void WindowSizeCallback(GLFWwindow *window, int width, int height)
+{
+    glViewport(0, 0, width, height);
+    Camera::UpdateProjectionMatrix(width, height);
+    clip_update_needed = true;
+}
+
 static bool IsPressed(GLFWwindow *window, int key)
 {
     bool pressed = glfwGetKey(window, key) == GLFW_PRESS;
@@ -128,13 +135,14 @@ int main()
     glfwSetKeyCallback(window, KeyCallback);
     glfwSetScrollCallback(window, ScrollCallback);
     glfwSetCursorPosCallback(window, CursorPosCallback);
+    glfwSetWindowSizeCallback(window, WindowSizeCallback);
 
     glfwSwapInterval(1);
     glViewport(0, 0, width, height);
     glEnable(GL_CULL_FACE);
     Camera::UpdateProjectionMatrix(width, height);
 
-    Icosphere::GenerateIcosphere(2);
+    Icosphere::GenerateIcosphere(3);
     Icosphere::SetUpRendering(glm::vec3(0.2f, 0.2f, 0.2f));
 
     ShaderProgram icosphere_shader("../shaders/icosphere.vert", "../shaders/icosphere.frag");
