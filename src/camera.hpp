@@ -9,8 +9,8 @@ private:
     constexpr static glm::vec3 _look_target = glm::vec3(0.0f, 0.0f, 0.0f);
 
     // Расстояние до _look_target
-    inline static float _distance = 5.0f;
-    constexpr static float _min_distance = 2.2f;
+    inline static float _distance = 3.0f;
+    constexpr static float _min_distance = 2.1f;
     constexpr static float _max_distance = 8.0f;
 
     inline static float _yaw = 0.0f;   // Угол поворота вокруг оси Y
