@@ -97,6 +97,20 @@ static void TryUpdateClip()
     }
 }
 
+static void PropertiesWindow()
+{
+    if (!ImGui::Begin("Icosphere properties"))
+    {
+        ImGui::End();
+        return;
+    }
+
+    if (ImGui::ColorEdit3("Wireframe color", glm::value_ptr(Icosphere::wireframe_color)))
+        Icosphere::UpdateWireframeColor();
+
+    ImGui::End();
+}
+
 int main()
 {
     glfwSetErrorCallback(ErrorCallback);
@@ -159,7 +173,7 @@ int main()
         ImGui_ImplOpenGL3_NewFrame();
         ImGui::NewFrame();
 
-        ImGui::ShowDemoWindow();
+        PropertiesWindow();
 
         Icosphere::UseWireframeMode(false);
         Icosphere::Render();

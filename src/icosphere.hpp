@@ -13,7 +13,7 @@ private:
     inline static std::vector<glm::vec3> _colors;
     inline static std::vector<unsigned int> _triangles;
 
-    inline static glm::vec3 wireframe_color = glm::vec3(1.0f, 0.0f, 0.0f);
+    inline static glm::vec3 default_wireframe_color = glm::vec3(0.333f, 0.333f, 0.333f);
 
     inline static ShaderProgram _shader;
 
@@ -24,6 +24,7 @@ private:
     Icosphere() {}
 
 public:
+    inline static glm::vec3 wireframe_color;
 
     static void GenerateIcosphere(unsigned int depth = 0);
     static void SetUpRendering(const glm::vec3 &default_color, ShaderProgram &&shader);

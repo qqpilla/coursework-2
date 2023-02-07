@@ -137,6 +137,7 @@ void Icosphere::SetUpRendering(const glm::vec3 &default_color, ShaderProgram &&s
 {
     _shader = shader;
     _colors.resize(_vertices.size(), default_color);
+    wireframe_color = default_wireframe_color;
 
     glGenVertexArrays(1, &_VAO);
     glGenBuffers(1, &_VBO);
