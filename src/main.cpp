@@ -4,9 +4,14 @@
 #include "GLFW/glfw3.h"
 #include "glm/gtc/type_ptr.hpp"
 #include "glm/vec2.hpp"
+#include "imgui.h"
+#include "backends/imgui_impl_opengl3.h"
+#include "backends/imgui_impl_glfw.h"
 
 #include "icosphere.hpp"
 #include "camera.hpp"
+
+static const char *glsl_version = "#version 330";
 
 static bool clip_update_needed = true;
 static glm::vec2 last_cursor_pos;
@@ -130,6 +135,12 @@ int main()
     glfwSetCursorPosCallback(window, CursorPosCallback);
     glfwSetWindowSizeCallback(window, WindowSizeCallback);
 
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplOpenGL3_Init(glsl_version);
+    ImGui::StyleColorsDark();
+
     glfwSwapInterval(1);
     glViewport(0, 0, width, height);
     glEnable(GL_CULL_FACE);
@@ -144,6 +155,12 @@ int main()
         glClearColor(0.65f, 0.65f, 0.65f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
+        ImGui_ImplGlfw_NewFrame();
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui::NewFrame();
+
+        ImGui::ShowDemoWindow();
+
         Icosphere::UseWireframeMode(false);
         Icosphere::Render();
         Icosphere::UseWireframeMode(true);
@@ -153,6 +170,9 @@ int main()
         glfwPollEvents();
         TryUpdateClip();
 
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
         glfwSwapBuffers(window);
 
         double now = glfwGetTime();
@@ -160,5 +180,9 @@ int main()
         last_time = now;
     }
     
+    ImGui_ImplGlfw_Shutdown();
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui::DestroyContext();
+
     glfwTerminate();
 }
