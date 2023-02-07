@@ -1,7 +1,8 @@
-#include "shader_program.hpp"
 #include <iostream>
 #include <fstream>
 #include <sstream>
+
+#include "shader_program.hpp"
 
 ShaderProgram::ShaderProgram(std::string vertex_shader_path, std::string fragment_shader_path)
 {
@@ -38,20 +39,20 @@ ShaderProgram::ShaderProgram(std::string vertex_shader_path, std::string fragmen
 
 void ShaderProgram::CreateShaderProgram(const char *vertex_source, const char *fragment_source)
 {
-    program = glCreateProgram();
+    _program = glCreateProgram();
     unsigned int vertex_shader = CompileShader(GL_VERTEX_SHADER, vertex_source);
     unsigned int fragment_shader = CompileShader(GL_FRAGMENT_SHADER, fragment_source);
 
-    glAttachShader(program, vertex_shader);
-    glAttachShader(program, fragment_shader);
-    glLinkProgram(program);
+    glAttachShader(_program, vertex_shader);
+    glAttachShader(_program, fragment_shader);
+    glLinkProgram(_program);
 
     int linking_result;
-    glGetProgramiv(program, GL_LINK_STATUS, &linking_result);
+    glGetProgramiv(_program, GL_LINK_STATUS, &linking_result);
     if (linking_result == GL_FALSE)
     {
         char info_log[512];
-        glGetProgramInfoLog(program, 512, NULL, info_log);
+        glGetProgramInfoLog(_program, 512, NULL, info_log);
         std::cout << "ERROR: FAILED TO LINK PROGRAM\n" << info_log << std::endl;
     }
 }
@@ -78,5 +79,29 @@ unsigned int ShaderProgram::CompileShader(GLuint type, const char *source)
 
 unsigned int ShaderProgram::ID() const
 {
-    return program;
+    return _program;
+}
+
+void ShaderProgram::SetUniformMatrix4fv(const GLchar *name, const GLfloat *value)
+{
+    if (_uniforms_locations.find(name) == _uniforms_locations.end())
+        _uniforms_locations[name] = glGetUniformLocation(_program, name);
+
+    glUniformMatrix4fv(_uniforms_locations[name], 1, GL_FALSE, value);
+}
+
+void ShaderProgram::SetUniform1i(const GLchar *name, GLint value)
+{
+    if (_uniforms_locations.find(name) == _uniforms_locations.end())
+        _uniforms_locations[name] = glGetUniformLocation(_program, name);
+
+    glUniform1i(_uniforms_locations[name], value);
+}
+
+void ShaderProgram::SetUniform3fv(const GLchar *name, const GLfloat *value)
+{
+    if (_uniforms_locations.find(name) == _uniforms_locations.end())
+        _uniforms_locations[name] = glGetUniformLocation(_program, name);
+
+    glUniform3fv(_uniforms_locations[name], 1, value);
 }
