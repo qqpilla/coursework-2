@@ -6,11 +6,10 @@
 #include "glm/vec2.hpp"
 
 #include "icosphere.hpp"
-#include "shader_program.hpp"
 #include "camera.hpp"
 
 static bool clip_update_needed = true;
-static glm::vec2 last_cursor_pos = glm::vec2(0.0, 0.0);
+static glm::vec2 last_cursor_pos;
 
 float delta_time = 0.0f;
 
@@ -84,19 +83,13 @@ static void ProcessInput(GLFWwindow *window)
     }
 }
 
-static void TryUpdateClip(unsigned int u_clip_matrix_loc)
+static void TryUpdateClip()
 {
     if (clip_update_needed)
     {
-        glUniformMatrix4fv(u_clip_matrix_loc, 1, GL_FALSE, glm::value_ptr(Camera::ClipSpaceMatrix()));
+        Icosphere::SetClipMatrix(Camera::ClipSpaceMatrix());
         clip_update_needed = false;
     }
-}
-
-static void SetWireframeMode(unsigned int u_wireframe_mode_loc, bool value)
-{
-    glUniform1i(u_wireframe_mode_loc, value);
-    glPolygonMode(GL_FRONT, value ? GL_LINE : GL_FILL);
 }
 
 int main()
@@ -143,32 +136,22 @@ int main()
     Camera::UpdateProjectionMatrix(width, height);
 
     Icosphere::GenerateIcosphere(3);
-    Icosphere::SetUpRendering(glm::vec3(0.2f, 0.2f, 0.2f));
-
-    ShaderProgram icosphere_shader("../shaders/icosphere.vert", "../shaders/icosphere.frag");
-    unsigned int u_clip_matrix_loc = glGetUniformLocation(icosphere_shader.ID(), "u_clip_matrix");
-    unsigned int u_wireframe_mode_loc = glGetUniformLocation(icosphere_shader.ID(), "u_wireframe_mode");
-    unsigned int u_wireframe_color_loc = glGetUniformLocation(icosphere_shader.ID(), "u_wireframe_color");
-
-    glUseProgram(icosphere_shader.ID());
-    glUniform3fv(u_wireframe_color_loc, 1, glm::value_ptr(Icosphere::wireframe_color));
+    Icosphere::SetUpRendering(glm::vec3(0.2f, 0.2f, 0.2f), {"../shaders/icosphere.vert", "../shaders/icosphere.frag"});
 
     double last_time = 0.0f;
-    double timer = 0.0f;
-    int fps = 0;
     while (!glfwWindowShouldClose(window))
     {
         glClearColor(0.65f, 0.65f, 0.65f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        SetWireframeMode(u_wireframe_mode_loc, false);
+        Icosphere::UseWireframeMode(false);
         Icosphere::Render();
-        SetWireframeMode(u_wireframe_mode_loc, true);
+        Icosphere::UseWireframeMode(true);
         Icosphere::Render();
         
         ProcessInput(window);
         glfwPollEvents();
-        TryUpdateClip(u_clip_matrix_loc);
+        TryUpdateClip();
 
         glfwSwapBuffers(window);
 

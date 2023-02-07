@@ -1,10 +1,13 @@
 #include <vector>
 #include <unordered_map>
+
 #include "glm/vec3.hpp"
 #include "glm/geometric.hpp"
+#include "glm/gtc/type_ptr.hpp"
 #include "glad/gl.h"
 
 #include "icosphere.hpp"
+#include "shader_program.hpp"
 
 static void CreateIcosahedron(std::vector<glm::vec3> &vertices, std::vector<unsigned int> &triangles)
 {
@@ -130,8 +133,9 @@ void Icosphere::GenerateIcosphere(unsigned int depth /*= 0*/)
     }
 }
 
-void Icosphere::SetUpRendering(const glm::vec3 &default_color)
+void Icosphere::SetUpRendering(const glm::vec3 &default_color, ShaderProgram &&shader)
 {
+    _shader = shader;
     _colors.resize(_vertices.size(), default_color);
 
     glGenVertexArrays(1, &_VAO);
@@ -156,6 +160,13 @@ void Icosphere::SetUpRendering(const glm::vec3 &default_color)
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+    // Если в программе появится больше шейдеров, то в конце функии нужно отключить шейдер,
+    // и использовать его только тогда, когда требуется передать в него данные 
+    // или отрисовать икосферу.
+    glUseProgram(_shader.ID());
+
+    UpdateWireframeColor();
 }
 
 void Icosphere::Render()
@@ -163,4 +174,20 @@ void Icosphere::Render()
     glBindVertexArray(_VAO);
     glDrawElements(GL_TRIANGLES, _triangles.size(), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
+}
+
+void Icosphere::UpdateWireframeColor()
+{
+    _shader.SetUniform3fv("u_wireframe_color", glm::value_ptr(wireframe_color));
+}
+
+void Icosphere::UseWireframeMode(bool value)
+{
+    _shader.SetUniform1i("u_wireframe_mode", value);
+    glPolygonMode(GL_FRONT, value ? GL_LINE : GL_FILL);
+}
+
+void Icosphere::SetClipMatrix(const glm::mat4 &value)
+{
+    _shader.SetUniformMatrix4fv("u_clip_matrix", glm::value_ptr(value));
 }
