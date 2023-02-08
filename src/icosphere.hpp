@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "glm/vec3.hpp"
+#include "glm/mat4x4.hpp"
 
 #include "shader_program.hpp"
 
@@ -13,7 +14,7 @@ private:
     inline static std::vector<glm::vec3> _colors;
     inline static std::vector<unsigned int> _triangles;
 
-    inline static glm::vec3 default_wireframe_color = glm::vec3(0.333f, 0.333f, 0.333f);
+    inline static glm::vec3 _default_wireframe_color = glm::vec3(0.333f, 0.333f, 0.333f);
 
     inline static ShaderProgram _shader;
 
@@ -31,6 +32,7 @@ public:
     static void Render();
 
     static void UpdateWireframeColor();
+    static void SetWireframeColorToDefault();
     static void UseWireframeMode(bool value);
     static void SetClipMatrix(const glm::mat4 &value);
 };

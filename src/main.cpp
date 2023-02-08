@@ -105,7 +105,12 @@ static void PropertiesWindow()
         return;
     }
 
-    if (ImGui::ColorEdit3("Wireframe color", glm::value_ptr(Icosphere::wireframe_color)))
+    ImGui::AlignTextToFramePadding();
+    ImGui::Text("Wireframe color");
+    ImGui::SameLine();
+    if (ImGui::Button("Reset"))
+        Icosphere::SetWireframeColorToDefault();
+    if (ImGui::ColorEdit3("", glm::value_ptr(Icosphere::wireframe_color)))
         Icosphere::UpdateWireframeColor();
 
     ImGui::End();
