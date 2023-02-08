@@ -110,8 +110,9 @@ static void PropertiesWindow()
     ImGui::SameLine();
     if (ImGui::Button("Reset"))
         Icosphere::SetWireframeColorToDefault();
-    if (ImGui::ColorEdit3("", glm::value_ptr(Icosphere::wireframe_color)))
+    if (ImGui::ColorEdit3("", glm::value_ptr(Icosphere::Wireframe_color)))
         Icosphere::UpdateWireframeColor();
+    ImGui::Checkbox("Draw wireframe", &Icosphere::Should_draw_wireframe);
 
     ImGui::End();
 }
@@ -180,9 +181,6 @@ int main()
 
         PropertiesWindow();
 
-        Icosphere::UseWireframeMode(false);
-        Icosphere::Render();
-        Icosphere::UseWireframeMode(true);
         Icosphere::Render();
         
         ProcessInput(window);

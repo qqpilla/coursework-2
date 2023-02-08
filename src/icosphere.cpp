@@ -137,7 +137,7 @@ void Icosphere::SetUpRendering(const glm::vec3 &default_color, ShaderProgram &&s
 {
     _shader = shader;
     _colors.resize(_vertices.size(), default_color);
-    wireframe_color = _default_wireframe_color;
+    Wireframe_color = _default_wireframe_color;
 
     glGenVertexArrays(1, &_VAO);
     glGenBuffers(1, &_VBO);
@@ -170,28 +170,40 @@ void Icosphere::SetUpRendering(const glm::vec3 &default_color, ShaderProgram &&s
     UpdateWireframeColor();
 }
 
-void Icosphere::Render()
+void Icosphere::Draw()
 {
     glBindVertexArray(_VAO);
     glDrawElements(GL_TRIANGLES, _triangles.size(), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
 }
 
-void Icosphere::UpdateWireframeColor()
-{
-    _shader.SetUniform3fv("u_wireframe_color", glm::value_ptr(wireframe_color));
-}
-
-void Icosphere::SetWireframeColorToDefault()
-{
-    wireframe_color = _default_wireframe_color;
-    UpdateWireframeColor();
-}
-
 void Icosphere::UseWireframeMode(bool value)
 {
     _shader.SetUniform1i("u_wireframe_mode", value);
     glPolygonMode(GL_FRONT, value ? GL_LINE : GL_FILL);
+}
+
+void Icosphere::Render()
+{
+    Draw();
+
+    if (Should_draw_wireframe)
+    {
+        UseWireframeMode(true);
+        Draw();
+        UseWireframeMode(false);
+    }
+}
+
+void Icosphere::UpdateWireframeColor()
+{
+    _shader.SetUniform3fv("u_wireframe_color", glm::value_ptr(Wireframe_color));
+}
+
+void Icosphere::SetWireframeColorToDefault()
+{
+    Wireframe_color = _default_wireframe_color;
+    UpdateWireframeColor();
 }
 
 void Icosphere::SetClipMatrix(const glm::mat4 &value)

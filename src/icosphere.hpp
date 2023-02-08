@@ -24,8 +24,12 @@ private:
 
     Icosphere() {}
 
+    static void Draw();
+    static void UseWireframeMode(bool value);
+
 public:
-    inline static glm::vec3 wireframe_color;
+    inline static glm::vec3 Wireframe_color;
+    inline static bool Should_draw_wireframe = true;
 
     static void GenerateIcosphere(unsigned int depth = 0);
     static void SetUpRendering(const glm::vec3 &default_color, ShaderProgram &&shader);
@@ -33,6 +37,5 @@ public:
 
     static void UpdateWireframeColor();
     static void SetWireframeColorToDefault();
-    static void UseWireframeMode(bool value);
     static void SetClipMatrix(const glm::mat4 &value);
 };
