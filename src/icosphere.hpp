@@ -31,6 +31,8 @@ public:
     inline static glm::vec3 Wireframe_color;
     inline static bool Should_draw_wireframe = true;
 
+    constexpr static float Drag_sensitivity = 0.7f;
+
     static void GenerateIcosphere(unsigned int depth = 0);
     static void SetUpRendering(const glm::vec3 &default_color, ShaderProgram &&shader);
     static void Render();
