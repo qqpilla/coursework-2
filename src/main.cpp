@@ -42,7 +42,7 @@ void CursorPosCallback(GLFWwindow *window, double x_pos, double y_pos)
 {
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
     {
-        glm::vec2 move(-(x_pos - last_cursor_pos.x) * Icosphere::Drag_sensitivity, (y_pos - last_cursor_pos.y) * Icosphere::Drag_sensitivity);
+        glm::vec2 move(-(x_pos - last_cursor_pos.x) * Camera::Drag_sensitivity, (y_pos - last_cursor_pos.y) * Camera::Drag_sensitivity);
         Camera::Rotate(move.x, move.y);
         clip_update_needed = true;
     }

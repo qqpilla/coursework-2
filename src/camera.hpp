@@ -34,6 +34,8 @@ public:
         STAY = 0
     };
 
+    constexpr static float Drag_sensitivity = 0.6f;
+
     static glm::mat4 ClipSpaceMatrix();
     static void UpdateProjectionMatrix(unsigned int w_width, unsigned int w_height);
     static void Rotate(float yaw, float pitch);
