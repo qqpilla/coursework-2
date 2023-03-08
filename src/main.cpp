@@ -92,30 +92,30 @@ static void TryUpdateClip()
 {
     if (clip_update_needed)
     {
-        Icosphere::SetClipMatrix(Camera::ClipSpaceMatrix());
+        // Icosphere::SetClipMatrix(Camera::ClipSpaceMatrix());
         clip_update_needed = false;
     }
 }
 
-static void PropertiesWindow()
-{
-    if (!ImGui::Begin("Icosphere properties"))
-    {
-        ImGui::End();
-        return;
-    }
+// static void PropertiesWindow()
+// {
+//     if (!ImGui::Begin("Icosphere properties"))
+//     {
+//         ImGui::End();
+//         return;
+//     }
 
-    ImGui::AlignTextToFramePadding();
-    ImGui::Text("Wireframe color");
-    ImGui::SameLine();
-    if (ImGui::Button("Reset"))
-        Icosphere::SetWireframeColorToDefault();
-    if (ImGui::ColorEdit3("", glm::value_ptr(Icosphere::Wireframe_color)))
-        Icosphere::UpdateWireframeColor();
-    ImGui::Checkbox("Draw wireframe", &Icosphere::Should_draw_wireframe);
+//     ImGui::AlignTextToFramePadding();
+//     ImGui::Text("Wireframe color");
+//     ImGui::SameLine();
+//     if (ImGui::Button("Reset"))
+//         Icosphere::SetWireframeColorToDefault();
+//     if (ImGui::ColorEdit3("", glm::value_ptr(Icosphere::Wireframe_color)))
+//         Icosphere::UpdateWireframeColor();
+//     ImGui::Checkbox("Draw wireframe", &Icosphere::Should_draw_wireframe);
 
-    ImGui::End();
-}
+//     ImGui::End();
+// }
 
 int main()
 {
@@ -166,8 +166,8 @@ int main()
     glEnable(GL_CULL_FACE);
     Camera::UpdateProjectionMatrix(width, height);
 
-    Icosphere::GenerateIcosphere(3);
-    Icosphere::SetUpRendering(glm::vec3(0.2f, 0.2f, 0.2f), {"../shaders/icosphere.vert", "../shaders/icosphere.frag"});
+    // Icosphere::GenerateIcosphere(3);
+    // Icosphere::SetUpRendering(glm::vec3(0.2f, 0.2f, 0.2f), {"../shaders/icosphere.vert", "../shaders/icosphere.frag"});
 
     double last_time = 0.0f;
     while (!glfwWindowShouldClose(window))
@@ -175,20 +175,20 @@ int main()
         glClearColor(0.65f, 0.65f, 0.65f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        ImGui_ImplGlfw_NewFrame();
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui::NewFrame();
+        // ImGui_ImplGlfw_NewFrame();
+        // ImGui_ImplOpenGL3_NewFrame();
+        // ImGui::NewFrame();
 
-        PropertiesWindow();
+        // PropertiesWindow();
 
-        Icosphere::Render();
+        // Icosphere::Render();
         
         ProcessInput(window);
         glfwPollEvents();
         TryUpdateClip();
 
-        ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        // ImGui::Render();
+        // ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         glfwSwapBuffers(window);
 
