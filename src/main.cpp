@@ -8,10 +8,13 @@
 #include "backends/imgui_impl_opengl3.h"
 #include "backends/imgui_impl_glfw.h"
 
-#include "icosphere.hpp"
+// #include "icosphere.hpp"
+#include "sphere.hpp"
 #include "camera.hpp"
 
 static const char *glsl_version = "#version 330";
+
+static Sphere sphere;
 
 static bool clip_update_needed = true;
 static glm::vec2 last_cursor_pos;
@@ -93,6 +96,7 @@ static void TryUpdateClip()
     if (clip_update_needed)
     {
         // Icosphere::SetClipMatrix(Camera::ClipSpaceMatrix());
+        sphere.SetClipMatrix(Camera::ClipSpaceMatrix());
         clip_update_needed = false;
     }
 }
@@ -168,6 +172,9 @@ int main()
 
     // Icosphere::GenerateIcosphere(3);
     // Icosphere::SetUpRendering(glm::vec3(0.2f, 0.2f, 0.2f), {"../shaders/icosphere.vert", "../shaders/icosphere.frag"});
+    sphere = Sphere({glm::vec3(0.3f, 0.5f, 0.0f)}, {"../shaders/sphere.vert", "../shaders/sphere.frag"});
+
+    glPointSize(10);
 
     double last_time = 0.0f;
     while (!glfwWindowShouldClose(window))
@@ -182,6 +189,7 @@ int main()
         // PropertiesWindow();
 
         // Icosphere::Render();
+        sphere.Draw();
         
         ProcessInput(window);
         glfwPollEvents();
