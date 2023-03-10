@@ -11,9 +11,9 @@ glm::mat4 Camera::ClipSpaceMatrix()
 {
     glm::vec3 position
     (
-        _distance * cos(glm::radians(_yaw)) * cos(glm::radians(_pitch)),
-        _distance * sin(glm::radians(_pitch)),
-        _distance * sin(glm::radians(_yaw)) * cos(glm::radians(_pitch))
+        _distance * glm::cos(glm::radians(_yaw)) * glm::cos(glm::radians(_pitch)),
+        _distance * glm::sin(glm::radians(_pitch)),
+        _distance * glm::sin(glm::radians(_yaw)) * glm::cos(glm::radians(_pitch))
     );
 
     return _projection * glm::lookAt(position, _look_target, glm::vec3(0.0f, 0.1f, 0.0f));

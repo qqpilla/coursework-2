@@ -15,7 +15,7 @@ private:
 
     inline static float _yaw = 0.0f;   // Угол поворота вокруг оси Y
     inline static float _pitch = 0.0f; // Угол поворота вокруг оси X
-    constexpr static float _max_pitch = 50.0f;
+    constexpr static float _max_pitch = 89.0f;
 
     constexpr static float _rotation_speed = 25.0f;
     constexpr static float _zoom_speed = 4.5f;
