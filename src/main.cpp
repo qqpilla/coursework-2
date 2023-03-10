@@ -168,7 +168,7 @@ int main()
     glEnable(GL_CULL_FACE);
     Camera::UpdateProjectionMatrix(width, height);
 
-    sphere = Sphere({glm::vec3(0.3f, 0.5f, 0.0f)}, {"../shaders/sphere.vert", "../shaders/sphere.frag"});
+    sphere = Sphere(30, {"../shaders/sphere.vert", "../shaders/sphere.frag"});
 
     glPointSize(10);
 
