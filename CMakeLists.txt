@@ -3,7 +3,6 @@ project(coursework2 LANGUAGES C CXX)
 
 set(sources 
     ./src/main.cpp
-    ./src/icosphere.cpp
     ./src/shader_program.cpp
     ./src/camera.cpp
     ./src/sphere.cpp
