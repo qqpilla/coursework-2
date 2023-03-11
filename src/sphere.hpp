@@ -12,8 +12,7 @@ class Sphere
 private:
     std::vector<glm::vec3> _points;
 
-    unsigned int _detail_level;
-    static const unsigned int _max_detail_level = 30;
+    static const unsigned int _max_detail_level = 40;
 
     ShaderProgram _shader;
 
@@ -23,10 +22,16 @@ private:
     void SetUpRendering();
 
 public:
+    int Detail_level;
+
     Sphere() {}
     Sphere(const std::vector<glm::vec3> &points, ShaderProgram &&shader);
     Sphere(unsigned int level_of_detail, ShaderProgram &&shader);
+
+    int MaxDetailLevel() const { return int(_max_detail_level); }
     
     void SetClipMatrix(const glm::mat4 &value);
+    void UpdateSphereShape();
+
     void Draw() const;
 };

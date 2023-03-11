@@ -99,25 +99,19 @@ static void TryUpdateClip()
     }
 }
 
-// static void PropertiesWindow()
-// {
-//     if (!ImGui::Begin("Icosphere properties"))
-//     {
-//         ImGui::End();
-//         return;
-//     }
+static void PropertiesWindow()
+{
+    if (!ImGui::Begin("Sphere properties"))
+    {
+        ImGui::End();
+        return;
+    }
 
-//     ImGui::AlignTextToFramePadding();
-//     ImGui::Text("Wireframe color");
-//     ImGui::SameLine();
-//     if (ImGui::Button("Reset"))
-//         Icosphere::SetWireframeColorToDefault();
-//     if (ImGui::ColorEdit3("", glm::value_ptr(Icosphere::Wireframe_color)))
-//         Icosphere::UpdateWireframeColor();
-//     ImGui::Checkbox("Draw wireframe", &Icosphere::Should_draw_wireframe);
+    if(sphere.Detail_level && ImGui::SliderInt("Level of detail", &(sphere.Detail_level), 1, sphere.MaxDetailLevel()))
+        sphere.UpdateSphereShape();
 
-//     ImGui::End();
-// }
+    ImGui::End();
+}
 
 int main()
 {
@@ -178,11 +172,11 @@ int main()
         glClearColor(0.65f, 0.65f, 0.65f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        // ImGui_ImplGlfw_NewFrame();
-        // ImGui_ImplOpenGL3_NewFrame();
-        // ImGui::NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui::NewFrame();
 
-        // PropertiesWindow();
+        PropertiesWindow();
 
         sphere.Draw();
         
@@ -190,8 +184,8 @@ int main()
         glfwPollEvents();
         TryUpdateClip();
 
-        // ImGui::Render();
-        // ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         glfwSwapBuffers(window);
 

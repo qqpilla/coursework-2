@@ -11,19 +11,17 @@
 
 void CreateUvSphere(float radius, unsigned int detail_level, std::vector<glm::vec3> &points_container);
 
-Sphere::Sphere(const std::vector<glm::vec3> &points, ShaderProgram &&shader) : _points(points), _shader(shader), _detail_level(0)
+Sphere::Sphere(const std::vector<glm::vec3> &points, ShaderProgram &&shader) : _points(points), _shader(shader), Detail_level(0)
 {
     SetUpRendering();
 }
 
-Sphere::Sphere(unsigned int level_of_detail, ShaderProgram &&shader) : _detail_level(level_of_detail), _shader(shader)
+Sphere::Sphere(unsigned int level_of_detail, ShaderProgram &&shader) : Detail_level(level_of_detail), _shader(shader)
 {
-    if (_detail_level > _max_detail_level)
-        _detail_level = _max_detail_level;
-    else if (_detail_level == 0)
-        _detail_level = 1;
+    Detail_level = std::min(Detail_level, int(_max_detail_level));
+    Detail_level = std::max(Detail_level, 1);
 
-    CreateUvSphere(1.0f, _detail_level, _points);
+    CreateUvSphere(1.0f, Detail_level, _points);
     SetUpRendering();
 }
 
@@ -82,6 +80,12 @@ void Sphere::SetUpRendering()
 void Sphere::SetClipMatrix(const glm::mat4 &value)
 {
     _shader.SetUniformMatrix4fv("u_clip_matrix", glm::value_ptr(value));
+}
+
+void Sphere::UpdateSphereShape()
+{
+    CreateUvSphere(1.0f, Detail_level, _points);
+    SetUpRendering();   
 }
 
 void Sphere::Draw() const
