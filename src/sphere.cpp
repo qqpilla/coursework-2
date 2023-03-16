@@ -77,9 +77,19 @@ void Sphere::SetUpRendering()
     glUseProgram(_shader.ID());
 }
 
-void Sphere::SetClipMatrix(const glm::mat4 &value)
+void Sphere::SetClipMatrixU(const glm::mat4 &value)
 {
     _shader.SetUniformMatrix4fv("u_clip_matrix", glm::value_ptr(value));
+}
+
+void Sphere::SetCameraCoordsU(const glm::vec3 &value)
+{
+    _shader.SetUniform3fv("u_cam_coords", glm::value_ptr(value));
+}
+
+void Sphere::SetCameraDistanceU(float value)
+{
+    _shader.SetUniform1f("u_cam_distance", value);
 }
 
 void Sphere::UpdateSphereShape()

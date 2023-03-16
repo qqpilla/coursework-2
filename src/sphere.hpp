@@ -30,7 +30,10 @@ public:
 
     int MaxDetailLevel() const { return int(_max_detail_level); }
     
-    void SetClipMatrix(const glm::mat4 &value);
+    void SetClipMatrixU(const glm::mat4 &value);
+    void SetCameraCoordsU(const glm::vec3 &value);
+    void SetCameraDistanceU(float value);
+
     void UpdateSphereShape();
 
     void Draw() const;

@@ -8,6 +8,8 @@ class Camera
 private:
     constexpr static glm::vec3 _look_target = glm::vec3(0.0f, 0.0f, 0.0f);
 
+    inline static glm::vec3 _position;
+
     // Расстояние до _look_target
     inline static float _distance = 3.0f;
     constexpr static float _min_distance = 2.1f;
@@ -36,8 +38,12 @@ public:
 
     constexpr static float Drag_sensitivity = 0.6f;
 
+    static const glm::vec3& Position() { return _position; }
+    static float Distance() { return _distance; }
     static glm::mat4 ClipSpaceMatrix();
+
     static void UpdateProjectionMatrix(unsigned int w_width, unsigned int w_height);
+    static void UpdatePosition();
     static void Rotate(float yaw, float pitch);
     static void Zoom(float zoom);
 };

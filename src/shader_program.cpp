@@ -77,31 +77,32 @@ unsigned int ShaderProgram::CompileShader(GLuint type, const char *source)
     return shader;
 }
 
-unsigned int ShaderProgram::ID() const
-{
-    return _program;
-}
-
-void ShaderProgram::SetUniformMatrix4fv(const GLchar *name, const GLfloat *value)
+void ShaderProgram::TryGetNewLocation(const GLchar *name)
 {
     if (_uniforms_locations.find(name) == _uniforms_locations.end())
         _uniforms_locations[name] = glGetUniformLocation(_program, name);
-
-    glUniformMatrix4fv(_uniforms_locations[name], 1, GL_FALSE, value);
 }
 
 void ShaderProgram::SetUniform1i(const GLchar *name, GLint value)
 {
-    if (_uniforms_locations.find(name) == _uniforms_locations.end())
-        _uniforms_locations[name] = glGetUniformLocation(_program, name);
-
+    TryGetNewLocation(name);
     glUniform1i(_uniforms_locations[name], value);
+}
+
+void ShaderProgram::SetUniform1f(const GLchar *name, GLfloat value)
+{
+    TryGetNewLocation(name);
+    glUniform1f(_uniforms_locations[name], value);
 }
 
 void ShaderProgram::SetUniform3fv(const GLchar *name, const GLfloat *value)
 {
-    if (_uniforms_locations.find(name) == _uniforms_locations.end())
-        _uniforms_locations[name] = glGetUniformLocation(_program, name);
-
+    TryGetNewLocation(name);
     glUniform3fv(_uniforms_locations[name], 1, value);
+}
+
+void ShaderProgram::SetUniformMatrix4fv(const GLchar *name, const GLfloat *value)
+{
+    TryGetNewLocation(name);
+    glUniformMatrix4fv(_uniforms_locations[name], 1, GL_FALSE, value);
 }

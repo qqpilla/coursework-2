@@ -37,6 +37,7 @@ void ScrollCallback(GLFWwindow *window, double x_offset, double y_offset)
         return;
 
     Camera::Zoom(y_offset > 0 ? int(Camera::Move::IN) : int(Camera::Move::OUT));
+    sphere.SetCameraDistanceU(Camera::Distance());
     clip_update_needed = true;
 }
 
@@ -76,17 +77,27 @@ static void ProcessInput(GLFWwindow *window)
     if (IsPressed(window, GLFW_KEY_UP))
     {
         if (IsPressed(window, GLFW_KEY_LEFT_SHIFT) || IsPressed(window, GLFW_KEY_RIGHT_SHIFT))
+        {
             Camera::Zoom(int(Camera::Move::IN));
+            sphere.SetCameraDistanceU(Camera::Distance());
+        }
         else
+        {
             Camera::Rotate(int(Camera::Move::STAY), int(Camera::Move::UP));
+        }
     }
 
     if (IsPressed(window, GLFW_KEY_DOWN))
     {
         if (IsPressed(window, GLFW_KEY_LEFT_SHIFT) || IsPressed(window, GLFW_KEY_RIGHT_SHIFT))
+        {
             Camera::Zoom(int(Camera::Move::OUT));
+            sphere.SetCameraDistanceU(Camera::Distance());
+        }
         else
+        {
             Camera::Rotate(int(Camera::Move::STAY), int(Camera::Move::DOWN));
+        }
     }
 }
 
@@ -94,7 +105,8 @@ static void TryUpdateClip()
 {
     if (clip_update_needed)
     {
-        sphere.SetClipMatrix(Camera::ClipSpaceMatrix());
+        sphere.SetClipMatrixU(Camera::ClipSpaceMatrix());
+        sphere.SetCameraCoordsU(Camera::Position());
         clip_update_needed = false;
     }
 }
@@ -164,8 +176,10 @@ int main()
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glPointSize(14);
     Camera::UpdateProjectionMatrix(width, height);
+    Camera::UpdatePosition();
 
     sphere = Sphere(30, {"../shaders/sphere.vert", "../shaders/sphere.frag"});
+    sphere.SetCameraDistanceU(Camera::Distance());
 
     double last_time = 0.0f;
     while (!glfwWindowShouldClose(window))
