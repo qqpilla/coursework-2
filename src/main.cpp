@@ -160,11 +160,12 @@ int main()
     glfwSwapInterval(1);
     glViewport(0, 0, width, height);
     glEnable(GL_CULL_FACE);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glPointSize(14);
     Camera::UpdateProjectionMatrix(width, height);
 
     sphere = Sphere(30, {"../shaders/sphere.vert", "../shaders/sphere.frag"});
-
-    glPointSize(10);
 
     double last_time = 0.0f;
     while (!glfwWindowShouldClose(window))
