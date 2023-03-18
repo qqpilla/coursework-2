@@ -171,10 +171,9 @@ int main()
 
     glfwSwapInterval(1);
     glViewport(0, 0, width, height);
-    glEnable(GL_CULL_FACE);
+    glEnable(GL_PROGRAM_POINT_SIZE);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glPointSize(14);
     Camera::UpdateProjectionMatrix(width, height);
     Camera::UpdatePosition();
 
