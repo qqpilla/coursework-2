@@ -75,7 +75,7 @@ void Sphere::SetUpRendering()
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     glUseProgram(_shader.ID());
-    _shader.SetUniform3fv("u_default_color", glm::value_ptr(_default_base_color));
+    UpdateSphereBaseColor();
 }
 
 void Sphere::SetClipMatrixU(const glm::mat4 &value)
@@ -97,6 +97,11 @@ void Sphere::UpdateSphereShape()
 {
     CreateUvSphere(1.0f, Detail_level, _points);
     SetUpRendering();   
+}
+
+void Sphere::UpdateSphereBaseColor()
+{
+    _shader.SetUniform3fv("u_base_color", glm::value_ptr(Base_Color));
 }
 
 void Sphere::Draw() const

@@ -13,7 +13,6 @@ private:
     std::vector<glm::vec3> _points;
 
     static const unsigned int _max_detail_level = 40;
-    inline static const glm::vec3 _default_base_color = glm::vec3(0.2f, 0.2f, 0.2f);
 
     ShaderProgram _shader;
 
@@ -24,6 +23,7 @@ private:
 
 public:
     int Detail_level;
+    glm::vec3 Base_Color = glm::vec3(0.2f, 0.2f, 0.2f);
 
     Sphere() {}
     Sphere(const std::vector<glm::vec3> &points, ShaderProgram &&shader);
@@ -36,6 +36,7 @@ public:
     void SetCameraDistanceU(float value);
 
     void UpdateSphereShape();
+    void UpdateSphereBaseColor();
 
     void Draw() const;
 };
