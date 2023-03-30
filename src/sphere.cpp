@@ -11,7 +11,7 @@
 
 void CreateUvSphere(float radius, unsigned int detail_level, std::vector<glm::vec3> &points_container);
 
-Sphere::Sphere(const std::vector<glm::vec3> &points, ShaderProgram &&shader) : _points(points), _shader(shader), Detail_level(0)
+Sphere::Sphere(const std::vector<glm::vec3> &points, ShaderProgram &&shader) : _base_points(points), _shader(shader), Detail_level(0)
 {
     SetUpRendering();
 }
@@ -21,7 +21,7 @@ Sphere::Sphere(unsigned int level_of_detail, ShaderProgram &&shader) : Detail_le
     Detail_level = std::min(Detail_level, int(_max_detail_level));
     Detail_level = std::max(Detail_level, 1);
 
-    CreateUvSphere(1.0f, Detail_level, _points);
+    CreateUvSphere(1.0f, Detail_level, _base_points);
     SetUpRendering();
 }
 
@@ -66,8 +66,8 @@ void Sphere::SetUpRendering()
     glBindVertexArray(_VAO);
     glBindBuffer(GL_ARRAY_BUFFER, _VBO);
 
-    std::size_t points_size = _points.size() * sizeof(glm::vec3);
-    glBufferData(GL_ARRAY_BUFFER, points_size, _points.data(), GL_STATIC_DRAW);
+    std::size_t points_size = _base_points.size() * sizeof(glm::vec3);
+    glBufferData(GL_ARRAY_BUFFER, points_size, _base_points.data(), GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
@@ -95,7 +95,7 @@ void Sphere::SetCameraDistanceU(float value)
 
 void Sphere::UpdateSphereShape()
 {
-    CreateUvSphere(1.0f, Detail_level, _points);
+    CreateUvSphere(1.0f, Detail_level, _base_points);
     SetUpRendering();   
 }
 
@@ -107,6 +107,6 @@ void Sphere::UpdateSphereBaseColor()
 void Sphere::Draw() const
 {
     glBindVertexArray(_VAO);
-    glDrawArrays(GL_POINTS, 0, _points.size());
+    glDrawArrays(GL_POINTS, 0, _base_points.size());
     glBindVertexArray(0);
 }

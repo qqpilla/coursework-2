@@ -10,7 +10,7 @@
 class Sphere
 {
 private:
-    std::vector<glm::vec3> _points;
+    std::vector<glm::vec3> _base_points;
 
     static const unsigned int _max_detail_level = 40;
 
