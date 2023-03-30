@@ -75,6 +75,7 @@ void Sphere::SetUpRendering()
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     glUseProgram(_shader.ID());
+    _shader.SetUniform3fv("u_default_color", glm::value_ptr(_default_base_color));
 }
 
 void Sphere::SetClipMatrixU(const glm::mat4 &value)

@@ -13,6 +13,7 @@ private:
     std::vector<glm::vec3> _points;
 
     static const unsigned int _max_detail_level = 40;
+    inline static const glm::vec3 _default_base_color = glm::vec3(0.2f, 0.2f, 0.2f);
 
     ShaderProgram _shader;
 
