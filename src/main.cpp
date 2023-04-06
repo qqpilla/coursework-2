@@ -121,8 +121,9 @@ static void PropertiesWindow()
 
     if(sphere.Detail_level && ImGui::SliderInt("Level of detail", &(sphere.Detail_level), 1, sphere.MaxDetailLevel()))
         sphere.UpdateSphereShape();
-    if (ImGui::ColorEdit3("Base color", glm::value_ptr(sphere.Base_Color)))
+    if (ImGui::ColorEdit3("Base color", glm::value_ptr(sphere.Base_color)))
         sphere.UpdateSphereBaseColor();
+
 
     ImGui::End();
 }

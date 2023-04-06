@@ -61,21 +61,58 @@ void CreateUvSphere(float radius, unsigned int detail_level, std::vector<glm::ve
 
 void Sphere::SetUpRendering()
 {
-    glGenVertexArrays(1, &_VAO);
-    glGenBuffers(1, &_VBO);
-    glBindVertexArray(_VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, _VBO);
+    glUseProgram(_shader.ID());
 
-    std::size_t points_size = _base_points.size() * sizeof(glm::vec3);
-    glBufferData(GL_ARRAY_BUFFER, points_size, _base_points.data(), GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
+    glGenVertexArrays(1, &_VAO);
+    glGenBuffers(1, &_coords_VBO);
+    glGenBuffers(1, &_colors_VBO);
+    glGenBuffers(1, &_rotations_VBO);
+
+    glBindVertexArray(_VAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, _coords_VBO);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(0);
+
+    unsigned int max_spheres = Rotation::MaxRotations() + 1;
+
+    glBindBuffer(GL_ARRAY_BUFFER, _colors_VBO);
+    glBufferData(GL_ARRAY_BUFFER, max_spheres * sizeof(glm::vec3), NULL, GL_STATIC_DRAW);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribDivisor(1, 1);
+
+    // Первые 3 float'а отвечают за координаты точки оси вращения, 4й - за угол
+    glBindBuffer(GL_ARRAY_BUFFER, _rotations_VBO);
+    glBufferData(GL_ARRAY_BUFFER, max_spheres * sizeof(glm::vec4), glm::value_ptr(glm::vec4(0.0f)), GL_STATIC_DRAW);
+    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(2);
+    glVertexAttribDivisor(2, 1);
 
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    glUseProgram(_shader.ID());
+    UpdateCoordsVBO();
     UpdateSphereBaseColor();
+}
+
+void Sphere::UpdateCoordsVBO()
+{
+    std::size_t points_size = _base_points.size() * sizeof(glm::vec3);
+
+    glBindBuffer(GL_ARRAY_BUFFER, _coords_VBO);
+    glBufferData(GL_ARRAY_BUFFER, points_size, _base_points.data(), GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
+void Sphere::UpdateColorsVBO()
+{
+    
+}
+
+void Sphere::UpdateRotationsVBO()
+{
+
 }
 
 void Sphere::SetClipMatrixU(const glm::mat4 &value)
@@ -96,17 +133,24 @@ void Sphere::SetCameraDistanceU(float value)
 void Sphere::UpdateSphereShape()
 {
     CreateUvSphere(1.0f, Detail_level, _base_points);
-    SetUpRendering();   
+    UpdateCoordsVBO();
 }
 
 void Sphere::UpdateSphereBaseColor()
 {
-    _shader.SetUniform3fv("u_base_color", glm::value_ptr(Base_Color));
+    glBindBuffer(GL_ARRAY_BUFFER, _colors_VBO);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec3), glm::value_ptr(Base_color));
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
+void Sphere::AddRotation(Rotation &&rotation)
+{
+    Rotations.push_back(rotation);
 }
 
 void Sphere::Draw() const
 {
     glBindVertexArray(_VAO);
-    glDrawArrays(GL_POINTS, 0, _base_points.size());
+    glDrawArraysInstanced(GL_POINTS, 0, _base_points.size(), Rotations.size() + 1);
     glBindVertexArray(0);
 }
