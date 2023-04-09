@@ -82,12 +82,14 @@ void Sphere::SetUpRendering()
     glEnableVertexAttribArray(1);
     glVertexAttribDivisor(1, 1);
 
-    // Первые 3 float'а отвечают за координаты точки оси вращения, 4й - за угол
     glBindBuffer(GL_ARRAY_BUFFER, _rotations_VBO);
-    glBufferData(GL_ARRAY_BUFFER, max_spheres * sizeof(glm::vec4), glm::value_ptr(glm::vec4(0.0f)), GL_STATIC_DRAW);
-    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, 0, 0);
-    glEnableVertexAttribArray(2);
-    glVertexAttribDivisor(2, 1);
+    glBufferData(GL_ARRAY_BUFFER, max_spheres * sizeof(glm::mat3), glm::value_ptr(glm::mat3(1.0f)), GL_STATIC_DRAW);
+    for (int i = 0; i < 3; i++)
+    {
+        glVertexAttribPointer(2 + i, 3, GL_FLOAT, GL_FALSE, sizeof(glm::mat3), (void*)(i*sizeof(glm::vec3)));
+        glEnableVertexAttribArray(2 + i);
+        glVertexAttribDivisor(2 + i, 1);
+    }
 
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
