@@ -3,6 +3,8 @@
 layout (location = 0) in vec3 coords;
 layout (location = 1) in vec3 color;
 layout (location = 2) in mat3 rotation_matrix;
+layout (location = 5) in int is_active;
+
 uniform mat4 u_clip_matrix;
 uniform vec3 u_cam_coords;
 uniform float u_cam_distance;
@@ -16,6 +18,12 @@ const float max_cam_distance_squared = 100.0f;
 
 void main()
 {
+    if (is_active == 0)
+    {
+        v_color = vec4(0.0f);
+        return;
+    }
+
     vec3 rotated_coords = rotation_matrix * coords;
     gl_Position = u_clip_matrix * vec4(rotated_coords, 1.0f);
 
