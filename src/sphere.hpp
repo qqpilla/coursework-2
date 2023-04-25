@@ -41,6 +41,8 @@ class Sphere
 {
 private:
     std::vector<glm::vec3> _base_points;
+    std::vector<Rotation> _rotations;
+
     static const unsigned int _max_detail_level = 40;
 
     ShaderProgram _shader;
@@ -51,6 +53,7 @@ private:
     unsigned int _rotations_VBO; // Содержит матрицы 3x3, задающие повороты (для сферы содержит единичную матрицу в качестве матрицы поворота)
     unsigned int _actives_VBO;   // Содержит значения члена _is_active поворотов (для сферы это всегда 1)
 
+
     void SetUpRendering();
     void UpdateCoordsVBO();
     void PutDataIntoVBO(unsigned int &VBO, std::size_t offset, std::size_t size, const void* data);
@@ -60,12 +63,12 @@ private:
 public:
     int Detail_level;
     glm::vec3 Base_color = glm::vec3(0.2f, 0.2f, 0.2f);
-    std::vector<Rotation> Rotations;
 
     Sphere() {}
     Sphere(const std::vector<glm::vec3> &points, ShaderProgram &&shader);
     Sphere(unsigned int level_of_detail, ShaderProgram &&shader);
 
+    const std::vector<Rotation>& Rotations() const { return _rotations; }
     int MaxDetailLevel() const { return int(_max_detail_level); }
     
     void SetClipMatrixU(const glm::mat4 &value);

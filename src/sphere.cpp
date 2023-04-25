@@ -14,7 +14,7 @@ void CreateUvSphere(float radius, unsigned int detail_level, std::vector<glm::ve
 
 Sphere::Sphere(const std::vector<glm::vec3> &points, ShaderProgram &&shader) : _base_points(points), _shader(shader), Detail_level(0)
 {
-    Rotations.resize(Rotation::MaxRotations());
+    _rotations.resize(Rotation::MaxRotations());
     SetUpRendering();
 }
 
@@ -23,7 +23,7 @@ Sphere::Sphere(unsigned int level_of_detail, ShaderProgram &&shader) : Detail_le
     Detail_level = std::min(Detail_level, int(_max_detail_level));
     Detail_level = std::max(Detail_level, 1);
 
-    Rotations.resize(Rotation::MaxRotations());
+    _rotations.resize(Rotation::MaxRotations());
 
     CreateUvSphere(1.0f, Detail_level, _base_points);
     SetUpRendering();
@@ -79,7 +79,7 @@ void Sphere::SetUpRendering()
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
     glEnableVertexAttribArray(0);
 
-    unsigned int max_spheres = Rotations.size() + 1;
+    unsigned int max_spheres = _rotations.size() + 1;
 
     glBindBuffer(GL_ARRAY_BUFFER, _colors_VBO);
     glBufferData(GL_ARRAY_BUFFER, max_spheres * sizeof(glm::vec3), NULL, GL_STATIC_DRAW);
@@ -157,23 +157,23 @@ void Sphere::UpdateSphereBaseColor()
 
 void Sphere::AddRotation(unsigned int ind)
 {
-    Rotations[ind]._is_active = true;
-    PutDataIntoVBO(_rotations_VBO, (ind + 1) * sizeof(glm::mat3), sizeof(glm::mat3), glm::value_ptr(Rotations[ind]._parent_matrix));
+    _rotations[ind]._is_active = true;
+    PutDataIntoVBO(_rotations_VBO, (ind + 1) * sizeof(glm::mat3), sizeof(glm::mat3), glm::value_ptr(_rotations[ind]._parent_matrix));
     PutDataIntoVBO(_actives_VBO, (ind + 1) * sizeof(int), sizeof(int), (void*)1);
-    UpdateChildRotations(ind, Rotations[ind]._parent_matrix);
+    UpdateChildRotations(ind, _rotations[ind]._parent_matrix);
 }
 
 void Sphere::UpdateRotation(unsigned int ind, bool rotation_changed, bool color_changed)
 {
     if (rotation_changed)
     {
-        glm::mat3 rotation_matrix = glm::mat3(glm::rotate(glm::mat4(Rotations[ind]._parent_matrix), Rotations[ind].Angle, Rotations[ind].Axis));
+        glm::mat3 rotation_matrix = glm::mat3(glm::rotate(glm::mat4(_rotations[ind]._parent_matrix), _rotations[ind].Angle, _rotations[ind].Axis));
         PutDataIntoVBO(_rotations_VBO, (ind + 1) * sizeof(glm::mat3), sizeof(glm::mat3), glm::value_ptr(rotation_matrix));
         UpdateChildRotations(ind, rotation_matrix);
     }
 
     if (color_changed)
-        PutDataIntoVBO(_colors_VBO, (ind + 1) * sizeof(glm::vec3), sizeof(glm::vec3), glm::value_ptr(Rotations[ind].Color));
+        PutDataIntoVBO(_colors_VBO, (ind + 1) * sizeof(glm::vec3), sizeof(glm::vec3), glm::value_ptr(_rotations[ind].Color));
 }
 
 void Sphere::UpdateChildRotations(unsigned int parent_ind, const glm::mat3 &parent_matrix)
@@ -201,8 +201,8 @@ void Sphere::UpdateChildRotations(unsigned int parent_ind, const glm::mat3 &pare
 
     for (unsigned int i = first_child; i < first_child + Rotation::Max_children; i++)
     {
-        Rotations[i]._parent_matrix = parent_matrix;
-        if (Rotations[i]._is_active)
+        _rotations[i]._parent_matrix = parent_matrix;
+        if (_rotations[i]._is_active)
             UpdateRotation(i, true, false);
     }
 }
@@ -210,6 +210,6 @@ void Sphere::UpdateChildRotations(unsigned int parent_ind, const glm::mat3 &pare
 void Sphere::Draw() const
 {
     glBindVertexArray(_VAO);
-    glDrawArraysInstanced(GL_POINTS, 0, _base_points.size(), Rotations.size() + 1);
+    glDrawArraysInstanced(GL_POINTS, 0, _base_points.size(), _rotations.size() + 1);
     glBindVertexArray(0);
 }
