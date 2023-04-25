@@ -15,6 +15,20 @@ void CreateUvSphere(float radius, unsigned int detail_level, std::vector<glm::ve
 Sphere::Sphere(const std::vector<glm::vec3> &points, ShaderProgram &&shader) : _base_points(points), _shader(shader), Detail_level(0)
 {
     _rotations.resize(Rotation::MaxRotations());
+    unsigned int ind = 0;
+    for (unsigned int depth = 1; depth < Rotation::Max_depth; depth++)
+    {
+        unsigned int local_rotations_num = pow(Rotation::Max_children, depth);
+        for (int i = 0; i < local_rotations_num; i++)
+        {
+            _rotations[ind].second = ind - i + i * Rotation::Max_children + local_rotations_num;
+            ind++;
+        }
+    }
+    // Повороты на максимальной глубине не имеют потомков
+    for (; ind < _rotations.size(); ind++)
+        _rotations[ind].second = -1;
+
     SetUpRendering();
 }
 
@@ -24,6 +38,19 @@ Sphere::Sphere(unsigned int level_of_detail, ShaderProgram &&shader) : Detail_le
     Detail_level = std::max(Detail_level, 1);
 
     _rotations.resize(Rotation::MaxRotations());
+    unsigned int ind = 0;
+    for (unsigned int depth = 1; depth < Rotation::Max_depth; depth++)
+    {
+        unsigned int local_rotations_num = pow(Rotation::Max_children, depth);
+        for (int i = 0; i < local_rotations_num; i++)
+        {
+            _rotations[ind].second = ind - i + i * Rotation::Max_children + local_rotations_num;
+            ind++;
+        }
+    }
+    // Повороты на максимальной глубине не имеют потомков
+    for (; ind < _rotations.size(); ind++)
+        _rotations[ind].second = -1;
 
     CreateUvSphere(1.0f, Detail_level, _base_points);
     SetUpRendering();
@@ -157,52 +184,39 @@ void Sphere::UpdateSphereBaseColor()
 
 void Sphere::AddRotation(unsigned int ind)
 {
-    _rotations[ind]._is_active = true;
-    PutDataIntoVBO(_rotations_VBO, (ind + 1) * sizeof(glm::mat3), sizeof(glm::mat3), glm::value_ptr(_rotations[ind]._parent_matrix));
+    Rotation* rotation = &_rotations[ind].first;
+
+    rotation->_is_active = true;
+    PutDataIntoVBO(_rotations_VBO, (ind + 1) * sizeof(glm::mat3), sizeof(glm::mat3), glm::value_ptr(rotation->_parent_matrix));
     PutDataIntoVBO(_actives_VBO, (ind + 1) * sizeof(int), sizeof(int), (void*)1);
-    UpdateChildRotations(ind, _rotations[ind]._parent_matrix);
+    UpdateChildRotations(ind, rotation->_parent_matrix);
 }
 
 void Sphere::UpdateRotation(unsigned int ind, bool rotation_changed, bool color_changed)
 {
+    const Rotation* rotation = &_rotations[ind].first;
+
     if (rotation_changed)
     {
-        glm::mat3 rotation_matrix = glm::mat3(glm::rotate(glm::mat4(_rotations[ind]._parent_matrix), _rotations[ind].Angle, _rotations[ind].Axis));
+        glm::mat3 rotation_matrix = glm::mat3(glm::rotate(glm::mat4(rotation->_parent_matrix), rotation->Angle, rotation->Axis));
         PutDataIntoVBO(_rotations_VBO, (ind + 1) * sizeof(glm::mat3), sizeof(glm::mat3), glm::value_ptr(rotation_matrix));
         UpdateChildRotations(ind, rotation_matrix);
     }
 
     if (color_changed)
-        PutDataIntoVBO(_colors_VBO, (ind + 1) * sizeof(glm::vec3), sizeof(glm::vec3), glm::value_ptr(_rotations[ind].Color));
+        PutDataIntoVBO(_colors_VBO, (ind + 1) * sizeof(glm::vec3), sizeof(glm::vec3), glm::value_ptr(rotation->Color));
 }
 
 void Sphere::UpdateChildRotations(unsigned int parent_ind, const glm::mat3 &parent_matrix)
 {
-    // Определяем глубину, на которой находится родитель,
-    // и считаем, сколько всего поворотов может быть на предыдущих глубинах
-    unsigned int parent_depth;
-    unsigned int rotations_num = 0;
-    for (int depth = 1; depth <= Rotation::Max_depth; depth++)
-    {
-        unsigned int local_rotations_num = pow(Rotation::Max_children, depth);
-        if (rotations_num + local_rotations_num > parent_ind)
-        {
-            parent_depth = depth;
-            break;
-        }
-        rotations_num += local_rotations_num;
-    }
-
-    if (parent_depth == Rotation::Max_depth)
+    unsigned int first_child_ind = _rotations[parent_ind].second;
+    if (first_child_ind == -1)
         return;
 
-    unsigned int local_parent_ind = parent_ind - rotations_num; // индекс родителя относительно своей глубины
-    unsigned int first_child = rotations_num + pow(Rotation::Max_children, parent_depth) + local_parent_ind * Rotation::Max_children;
-
-    for (unsigned int i = first_child; i < first_child + Rotation::Max_children; i++)
+    for (unsigned int i = first_child_ind; i < first_child_ind + Rotation::Max_children; i++)
     {
-        _rotations[i]._parent_matrix = parent_matrix;
-        if (_rotations[i]._is_active)
+        _rotations[i].first._parent_matrix = parent_matrix;
+        if (_rotations[i].first._is_active)
             UpdateRotation(i, true, false);
     }
 }

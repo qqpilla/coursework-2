@@ -41,7 +41,7 @@ class Sphere
 {
 private:
     std::vector<glm::vec3> _base_points;
-    std::vector<Rotation> _rotations;
+    std::vector<std::pair<Rotation, int>> _rotations; // int - индекс первого потомка поворота
 
     static const unsigned int _max_detail_level = 40;
 
@@ -68,7 +68,7 @@ public:
     Sphere(const std::vector<glm::vec3> &points, ShaderProgram &&shader);
     Sphere(unsigned int level_of_detail, ShaderProgram &&shader);
 
-    const std::vector<Rotation>& Rotations() const { return _rotations; }
+    const std::vector<std::pair<Rotation, int>>& Rotations() const { return _rotations; }
     int MaxDetailLevel() const { return int(_max_detail_level); }
     
     void SetClipMatrixU(const glm::mat4 &value);
