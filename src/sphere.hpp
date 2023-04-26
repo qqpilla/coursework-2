@@ -17,7 +17,6 @@ public:
     glm::vec3 Axis = glm::vec3(0.0f, 1.0f, 0.0f);
     glm::vec3 Color;
 
-
     static const unsigned int Max_depth = 2;
     static const unsigned int Max_children = 3;
 
@@ -28,6 +27,8 @@ public:
             m_rotations += pow(Max_children, depth);
         return m_rotations;
     }
+
+    bool IsActive() const { return _is_active; }
 
     friend class Sphere;
 
