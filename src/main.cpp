@@ -111,19 +111,69 @@ static void TryUpdateClip()
     }
 }
 
-static void PropertiesWindow()
+static void DisplayRotationContent()
 {
-    if (!ImGui::Begin("Sphere properties"))
+    ImGui::SameLine(); ImGui::Text("Angle  ;  "); 
+    ImGui::SameLine(); ImGui::Text("Axis Point  ;  ");
+    ImGui::SameLine(); ImGui::Text("Color  ;  ");
+    ImGui::SameLine(); if (ImGui::SmallButton("Delete Rotation")) {} // Если у поворота есть активные потомки, то выкидывай окошко для подтверждения (с галочкой "больше не спрашивать")  
+}
+
+static bool DisplayRotationNode(unsigned int ind)
+{
+    if (!sphere.Rotations()[ind].first.IsActive())
+    {
+        if (ImGui::Button("Add Rotation", {200.0f, 20.0f}))
+            sphere.AddRotation(ind);
+        return false;
+    }
+
+    if (sphere.Rotations()[ind].second != -1)
+    {
+        std::string id = "##Node" + std::to_string(ind);
+        bool opened = ImGui::TreeNodeEx(id.c_str(), ImGuiTreeNodeFlags_OpenOnArrow);
+        DisplayRotationContent();
+
+        if (opened)
+        {
+            for (unsigned int i = 0; i < Rotation::Max_children; i++)
+                if (!DisplayRotationNode(sphere.Rotations()[ind].second + i))
+                    break;
+            ImGui::TreePop();
+        }
+    }
+    else
+    {
+        std::string id = "##Bullet" + std::to_string(ind);
+        ImGui::Bullet();
+        DisplayRotationContent();
+    }
+
+    return true;
+}
+
+static void DrawUiWindow()
+{
+    // ImGui::ShowDemoWindow();
+    ImGui::SetNextWindowSizeConstraints({400, -1}, {INFINITY, -1});
+    if (!ImGui::Begin("##UiWindow", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
     {
         ImGui::End();
         return;
     }
 
-    if(sphere.Detail_level && ImGui::SliderInt("Level of detail", &(sphere.Detail_level), 1, sphere.MaxDetailLevel()))
+    ImGui::Text("SPHERE PROPERTIES:");
+    if(sphere.Detail_level && ImGui::SliderInt("Level of Detail", &(sphere.Detail_level), 1, sphere.MaxDetailLevel()))
         sphere.UpdateSphereShape();
-    if (ImGui::ColorEdit3("Base color", glm::value_ptr(sphere.Base_color)))
+    if (ImGui::ColorEdit3("Base Color", glm::value_ptr(sphere.Base_color)))
         sphere.UpdateSphereBaseColor();
 
+    ImGui::Separator();
+    ImGui::Text("ROTATIONS:");
+
+    for (unsigned int i = 0; i < Rotation::Max_children; i++)
+        if (!DisplayRotationNode(i))
+            break;
 
     ImGui::End();
 }
@@ -193,7 +243,7 @@ int main()
         ImGui_ImplOpenGL3_NewFrame();
         ImGui::NewFrame();
 
-        PropertiesWindow();
+        DrawUiWindow();
 
         sphere.Draw();
         
