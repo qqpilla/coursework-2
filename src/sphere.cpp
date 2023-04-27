@@ -187,9 +187,12 @@ void Sphere::AddRotation(unsigned int ind)
     Rotation* rotation = &_rotations[ind].first;
 
     rotation->_is_active = true;
+    rotation->Color = Base_color;
+
     int one = 1;
     PutDataIntoVBO(_rotations_VBO, (ind + 1) * sizeof(glm::mat3), sizeof(glm::mat3), glm::value_ptr(rotation->_parent_matrix));
     PutDataIntoVBO(_actives_VBO, (ind + 1) * sizeof(int), sizeof(int), &one);
+    PutDataIntoVBO(_colors_VBO, (ind + 1) * sizeof(glm::vec3), sizeof(glm::vec3), glm::value_ptr(rotation->Color));
     UpdateChildRotations(ind, rotation->_parent_matrix);
 }
 
