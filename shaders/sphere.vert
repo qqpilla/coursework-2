@@ -11,7 +11,7 @@ uniform float u_cam_distance;
 
 out vec4 v_color;
 
-const float min_alpha = 0.2f;
+const float min_alpha = 0.08f;
 const float sphere_radius = 1.0f;
 const float max_points_size = 12.0f;
 const float max_cam_distance_squared = 100.0f;
