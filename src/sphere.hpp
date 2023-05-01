@@ -60,6 +60,7 @@ private:
     void PutDataIntoVBO(unsigned int &VBO, std::size_t offset, std::size_t size, const void* data);
 
     void UpdateChildRotations(unsigned int parent_ind, const glm::mat3 &parent_matrix);
+    void SetChildRotationsVisibility(unsigned int parent_ind, bool is_visible);
 
 public:
     int Detail_level;
@@ -80,7 +81,7 @@ public:
     void UpdateSphereShape();
     void UpdateSphereBaseColor();
 
-    void UpdateRotation(unsigned int ind, bool rotation_changed, bool color_changed, bool visibility_changed);
+    void UpdateRotation(unsigned int ind, bool rotation_changed, bool color_changed, std::pair<bool, bool> visibility_changed);
 
     void Draw() const;
 };

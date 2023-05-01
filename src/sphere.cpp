@@ -180,7 +180,7 @@ void Sphere::UpdateSphereBaseColor()
     PutDataIntoVBO(_colors_VBO, 0, sizeof(glm::vec3), glm::value_ptr(Base_color));
 }
 
-void Sphere::UpdateRotation(unsigned int ind, bool rotation_changed, bool color_changed, bool visibility_changed)
+void Sphere::UpdateRotation(unsigned int ind, bool rotation_changed, bool color_changed, std::pair<bool, bool> visibility_changed)
 {
     const Rotation* rotation = &_rotations[ind].first;
 
@@ -194,10 +194,13 @@ void Sphere::UpdateRotation(unsigned int ind, bool rotation_changed, bool color_
     if (color_changed)
         PutDataIntoVBO(_colors_VBO, (ind + 1) * sizeof(glm::vec3), sizeof(glm::vec3), glm::value_ptr(rotation->Color));
 
-    if (visibility_changed)
+    if (visibility_changed.first)
     {
         int is_visible = (int)_rotations[ind].first.Is_visible;
         PutDataIntoVBO(_visibles_VBO, (ind + 1) * sizeof(int), sizeof(int), &is_visible);
+        
+        if (visibility_changed.second)
+            SetChildRotationsVisibility(ind, _rotations[ind].first.Is_visible);
     }
 }
 
@@ -210,7 +213,20 @@ void Sphere::UpdateChildRotations(unsigned int parent_ind, const glm::mat3 &pare
     for (unsigned int i = first_child_ind; i < first_child_ind + Rotation::Max_children; i++)
     {
         _rotations[i].first._parent_matrix = parent_matrix;
-        UpdateRotation(i, true, false, false);
+        UpdateRotation(i, true, false, {false, false});
+    }
+}
+
+void Sphere::SetChildRotationsVisibility(unsigned int parent_ind, bool is_visible)
+{
+    unsigned int first_child_ind = _rotations[parent_ind].second;
+    if (first_child_ind == -1)
+        return;
+
+    for (unsigned int i = first_child_ind; i < first_child_ind + Rotation::Max_children; i++)
+    {
+        _rotations[i].first.Is_visible = is_visible;
+        UpdateRotation(i, false, false, {true, true});
     }
 }
 

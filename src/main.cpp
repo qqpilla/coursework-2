@@ -120,9 +120,9 @@ static float GetPeriodicValue(float value, float period)
                      : value + period * std::floor(std::fabs(value) / period);
 }
 
-static std::tuple<bool, bool, bool> DisplayRotationContent(Rotation &rotation, const std::string &id)
+static std::tuple<bool, bool, std::pair<bool, bool>> DisplayRotationContent(Rotation &rotation, const std::string &id)
 {
-    std::tuple<bool, bool, bool> changed = {false, false, false};
+    std::tuple<bool, bool, std::pair<bool, bool>> changed = {false, false, {false, false}};
 
     std::string angle_label = "Angle##" + id;
     std::string axis_label = "Axis Vector##" + id;
@@ -140,14 +140,15 @@ static std::tuple<bool, bool, bool> DisplayRotationContent(Rotation &rotation, c
     std::get<1>(changed) = ImGui::ColorEdit3(color_label.c_str(), glm::value_ptr(rotation.Color), ImGuiColorEditFlags_NoInputs);
         
     ImGui::SameLine();
-    std::get<2>(changed) = ImGui::Checkbox(visible_label.c_str(), &rotation.Is_visible);
+    std::get<2>(changed).first = ImGui::Checkbox(visible_label.c_str(), &rotation.Is_visible);
+    std::get<2>(changed).second = ImGui::GetIO().KeyCtrl;
 
     return changed;
 }
 
-static void TryApplyChanges(const std::tuple<bool, bool, bool> &changes, unsigned int rotation_ind)
+static void TryApplyChanges(const std::tuple<bool, bool, std::pair<bool, bool>> &changes, unsigned int rotation_ind)
 {
-    if (!std::get<0>(changes) && !std::get<1>(changes) && !std::get<2>(changes))
+    if (!std::get<0>(changes) && !std::get<1>(changes) && !std::get<2>(changes).first)
         return;
 
     sphere.UpdateRotation(rotation_ind, std::get<0>(changes), std::get<1>(changes), std::get<2>(changes));
