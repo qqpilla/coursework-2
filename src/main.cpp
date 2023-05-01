@@ -191,6 +191,8 @@ static void DrawUiWindow()
         sphere.UpdateSphereShape();
     if (ImGui::ColorEdit3("Base Color", glm::value_ptr(sphere.Base_color)))
         sphere.UpdateSphereBaseColor();
+    if (ImGui::Checkbox("Visible", &sphere.Is_visible))
+        sphere.ChangeVisibility(ImGui::GetIO().KeyCtrl);
 
     ImGui::Separator();
     ImGui::Text("ROTATIONS:");

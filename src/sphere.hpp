@@ -65,6 +65,7 @@ private:
 public:
     int Detail_level;
     glm::vec3 Base_color = default_color;
+    bool Is_visible = true;
 
     Sphere() {}
     Sphere(const std::vector<glm::vec3> &points, ShaderProgram &&shader);
@@ -74,6 +75,8 @@ public:
     Rotation& RotationByIndex(unsigned int ind) { return _rotations[ind].first; } // Позволяет изменить поворот, но не структуру вектора _rotations
     int MaxDetailLevel() const { return int(_max_detail_level); }
     
+    void ChangeVisibility(bool should_affect_rotations);
+
     void SetClipMatrixU(const glm::mat4 &value);
     void SetCameraCoordsU(const glm::vec3 &value);
     void SetCameraDistanceU(float value);

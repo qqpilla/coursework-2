@@ -154,6 +154,23 @@ void Sphere::PutDataIntoVBO(unsigned int &VBO, std::size_t offset, std::size_t s
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
+void Sphere::ChangeVisibility(bool should_affect_rotations)
+{
+    int is_visible = (int)Is_visible;
+
+    if (!should_affect_rotations)
+    {
+        PutDataIntoVBO(_visibles_VBO, 0, sizeof(int), &is_visible);
+        return;
+    }
+    
+    for (auto &r : _rotations)
+        r.first.Is_visible = is_visible;
+
+    std::vector<int> visible = std::vector(_rotations.size() + 1, is_visible);
+    PutDataIntoVBO(_visibles_VBO, 0, visible.size() * sizeof(int), visible.data());
+}
+
 void Sphere::SetClipMatrixU(const glm::mat4 &value)
 {
     _shader.SetUniformMatrix4fv("u_clip_matrix", glm::value_ptr(value));
