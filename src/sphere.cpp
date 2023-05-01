@@ -202,7 +202,7 @@ void Sphere::UpdateRotation(unsigned int ind, bool rotation_changed, bool color_
 
     if (rotation_changed)
     {
-        glm::mat3 rotation_matrix = glm::mat3(glm::rotate(glm::mat4(rotation->_parent_matrix), rotation->Angle, rotation->Axis));
+        glm::mat3 rotation_matrix = glm::mat3(glm::rotate(glm::mat4(1.0f), glm::radians(rotation->Angle), rotation->Axis)) * rotation->_parent_matrix;
         PutDataIntoVBO(_rotations_VBO, (ind + 1) * sizeof(glm::mat3), sizeof(glm::mat3), glm::value_ptr(rotation_matrix));
         UpdateChildRotations(ind, rotation_matrix);
     }

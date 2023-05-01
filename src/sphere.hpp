@@ -70,6 +70,7 @@ public:
     Sphere(unsigned int level_of_detail, ShaderProgram &&shader);
 
     const std::vector<std::pair<Rotation, int>>& Rotations() const { return _rotations; }
+    Rotation& RotationByIndex(unsigned int ind) { return _rotations[ind].first; } // Позволяет изменить поворот, но не структуру вектора _rotations
     int MaxDetailLevel() const { return int(_max_detail_level); }
     
     void SetClipMatrixU(const glm::mat4 &value);

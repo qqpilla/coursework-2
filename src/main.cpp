@@ -111,28 +111,58 @@ static void TryUpdateClip()
     }
 }
 
-static void DisplayRotationContent()
+static std::pair<bool, bool> DisplayRotationContent(Rotation &rotation, const std::string &id)
 {
-    ImGui::SameLine(); ImGui::Text("Angle  ;  "); 
-    ImGui::SameLine(); ImGui::Text("Axis Point  ;  ");
-    ImGui::SameLine(); ImGui::Text("Color  ;  ");
-    ImGui::SameLine(); if (ImGui::SmallButton("Delete Rotation")) {} // Если у поворота есть активные потомки, то выкидывай окошко для подтверждения (с галочкой "больше не спрашивать")  
+    std::pair<bool, bool> changed = {false, false};
+
+    std::string angle_label = "Angle##" + id;
+    std::string axis_label = "Axis Point##" + id;
+    std::string color_label = "Color##" + id;
+
+    ImGui::SameLine(); 
+    if (ImGui::InputFloat(angle_label.c_str(), &rotation.Angle, 0.1f, 1.0f, "%.2f"))
+    {
+        rotation.Angle = std::max(rotation.Angle, -360.0f);
+        rotation.Angle = std::min(rotation.Angle, 360.0f);
+        changed.first = true;
+    }
+
+    ImGui::SameLine(); 
+    if (ImGui::InputFloat3(axis_label.c_str(), glm::value_ptr(rotation.Axis), "%.2f")) 
+        changed.first = true;
+
+    ImGui::SameLine(); 
+    if (ImGui::ColorEdit3(color_label.c_str(), glm::value_ptr(rotation.Color), ImGuiColorEditFlags_NoInputs)) 
+        changed.second = true;
+        
+    // Пока убрал удаление, потому что ещё не придумал, как его правильно реализовать
+    // ImGui::SameLine(); if (ImGui::SmallButton("Delete Rotation")) {} // Если у поворота есть активные потомки, то выкидывай окошко для подтверждения (с галочкой "больше не спрашивать")  
+
+    return changed;
+}
+
+static void TryApplyChanges(const std::pair<bool, bool> &changes, unsigned int rotation_ind)
+{
+    if (!changes.first && !changes.second)
+        return;
+
+    sphere.UpdateRotation(rotation_ind, changes.first, changes.second);
 }
 
 static bool DisplayRotationNode(unsigned int ind)
 {
-    if (!sphere.Rotations()[ind].first.IsActive())
+    if (!sphere.RotationByIndex(ind).IsActive())
     {
         if (ImGui::Button("Add Rotation", {200.0f, 20.0f}))
             sphere.AddRotation(ind);
         return false;
     }
 
+    std::string id = "##Node" + std::to_string(ind);
     if (sphere.Rotations()[ind].second != -1)
     {
-        std::string id = "##Node" + std::to_string(ind);
         bool opened = ImGui::TreeNodeEx(id.c_str(), ImGuiTreeNodeFlags_OpenOnArrow);
-        DisplayRotationContent();
+        TryApplyChanges(DisplayRotationContent(sphere.RotationByIndex(ind), std::to_string(ind)), ind);
 
         if (opened)
         {
@@ -144,9 +174,8 @@ static bool DisplayRotationNode(unsigned int ind)
     }
     else
     {
-        std::string id = "##Bullet" + std::to_string(ind);
         ImGui::Bullet();
-        DisplayRotationContent();
+        TryApplyChanges(DisplayRotationContent(sphere.RotationByIndex(ind), std::to_string(ind)), ind);
     }
 
     return true;
