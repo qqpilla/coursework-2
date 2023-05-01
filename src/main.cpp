@@ -120,52 +120,41 @@ static float GetPeriodicValue(float value, float period)
                      : value + period * std::floor(std::fabs(value) / period);
 }
 
-static std::pair<bool, bool> DisplayRotationContent(Rotation &rotation, const std::string &id)
+static std::tuple<bool, bool, bool> DisplayRotationContent(Rotation &rotation, const std::string &id)
 {
-    std::pair<bool, bool> changed = {false, false};
+    std::tuple<bool, bool, bool> changed = {false, false, false};
 
     std::string angle_label = "Angle##" + id;
-    std::string axis_label = "Axis Point##" + id;
+    std::string axis_label = "Axis Vector##" + id;
     std::string color_label = "Color##" + id;
+    std::string visible_label = "Visible##" + id; 
 
     ImGui::SameLine(); 
-    if (ImGui::InputFloat(angle_label.c_str(), &rotation.Angle, 0.1f, 1.0f, "%.2f"))
-    {
+    if (std::get<0>(changed) = ImGui::InputFloat(angle_label.c_str(), &rotation.Angle, 0.1f, 1.0f, "%.2f"))
         rotation.Angle = GetPeriodicValue(rotation.Angle, 360.0f);
-        changed.first = true;
-    }
 
     ImGui::SameLine(); 
-    if (ImGui::InputFloat3(axis_label.c_str(), glm::value_ptr(rotation.Axis), "%.2f")) 
-        changed.first = true;
+    std::get<0>(changed) = ImGui::InputFloat3(axis_label.c_str(), glm::value_ptr(rotation.Axis), "%.2f") || std::get<0>(changed);
 
     ImGui::SameLine(); 
-    if (ImGui::ColorEdit3(color_label.c_str(), glm::value_ptr(rotation.Color), ImGuiColorEditFlags_NoInputs)) 
-        changed.second = true;
+    std::get<1>(changed) = ImGui::ColorEdit3(color_label.c_str(), glm::value_ptr(rotation.Color), ImGuiColorEditFlags_NoInputs);
         
-    // Пока убрал удаление, потому что ещё не придумал, как его правильно реализовать
-    // ImGui::SameLine(); if (ImGui::SmallButton("Delete Rotation")) {} // Если у поворота есть активные потомки, то выкидывай окошко для подтверждения (с галочкой "больше не спрашивать")  
+    ImGui::SameLine();
+    std::get<2>(changed) = ImGui::Checkbox(visible_label.c_str(), &rotation.Is_visible);
 
     return changed;
 }
 
-static void TryApplyChanges(const std::pair<bool, bool> &changes, unsigned int rotation_ind)
+static void TryApplyChanges(const std::tuple<bool, bool, bool> &changes, unsigned int rotation_ind)
 {
-    if (!changes.first && !changes.second)
+    if (!std::get<0>(changes) && !std::get<1>(changes) && !std::get<2>(changes))
         return;
 
-    sphere.UpdateRotation(rotation_ind, changes.first, changes.second);
+    sphere.UpdateRotation(rotation_ind, std::get<0>(changes), std::get<1>(changes), std::get<2>(changes));
 }
 
-static bool DisplayRotationNode(unsigned int ind)
+static void DisplayRotationNode(unsigned int ind)
 {
-    if (!sphere.RotationByIndex(ind).IsActive())
-    {
-        if (ImGui::Button("Add Rotation", {200.0f, 20.0f}))
-            sphere.AddRotation(ind);
-        return false;
-    }
-
     std::string id = "##Node" + std::to_string(ind);
     if (sphere.Rotations()[ind].second != -1)
     {
@@ -175,8 +164,7 @@ static bool DisplayRotationNode(unsigned int ind)
         if (opened)
         {
             for (unsigned int i = 0; i < Rotation::Max_children; i++)
-                if (!DisplayRotationNode(sphere.Rotations()[ind].second + i))
-                    break;
+                DisplayRotationNode(sphere.Rotations()[ind].second + i);
             ImGui::TreePop();
         }
     }
@@ -185,8 +173,6 @@ static bool DisplayRotationNode(unsigned int ind)
         ImGui::Bullet();
         TryApplyChanges(DisplayRotationContent(sphere.RotationByIndex(ind), std::to_string(ind)), ind);
     }
-
-    return true;
 }
 
 static void DrawUiWindow()
@@ -209,8 +195,7 @@ static void DrawUiWindow()
     ImGui::Text("ROTATIONS:");
 
     for (unsigned int i = 0; i < Rotation::Max_children; i++)
-        if (!DisplayRotationNode(i))
-            break;
+        DisplayRotationNode(i);
 
     ImGui::End();
 }

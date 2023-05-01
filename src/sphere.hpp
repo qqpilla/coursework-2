@@ -8,6 +8,8 @@
 
 #include "shader_program.hpp"
 
+static glm::vec3 default_color = glm::vec3(0.2f, 0.2f, 0.2f);
+
 struct Rotation
 {
 public:
@@ -15,7 +17,8 @@ public:
     // Ось - это вектор, проходящий через центр сферы (начало координат) и вторую точку, 
     // координаты которой и будут координатами вектора, поэтому назовём её просто Axis
     glm::vec3 Axis = glm::vec3(0.0f, 1.0f, 0.0f);
-    glm::vec3 Color;
+    glm::vec3 Color = default_color;
+    bool Is_visible = false;
 
     static const unsigned int Max_depth = 2;
     static const unsigned int Max_children = 3;
@@ -28,14 +31,11 @@ public:
         return m_rotations;
     }
 
-    bool IsActive() const { return _is_active; }
-
     friend class Sphere;
 
 private:
 
     glm::mat3 _parent_matrix = glm::mat3(1.0f);
-    bool _is_active = false;
 };
 
 class Sphere
@@ -52,7 +52,7 @@ private:
     unsigned int _coords_VBO;    // Содержит координаты _base_points
     unsigned int _colors_VBO;    // Содержит цвет сферы и цвета всех поворотов
     unsigned int _rotations_VBO; // Содержит матрицы 3x3, задающие повороты (для сферы содержит единичную матрицу в качестве матрицы поворота)
-    unsigned int _actives_VBO;   // Содержит значения члена _is_active поворотов (для сферы это всегда 1)
+    unsigned int _visibles_VBO;  // Содержит значения члена Is_visible поворотов (для сферы это всегда 1)
 
 
     void SetUpRendering();
@@ -63,7 +63,7 @@ private:
 
 public:
     int Detail_level;
-    glm::vec3 Base_color = glm::vec3(0.2f, 0.2f, 0.2f);
+    glm::vec3 Base_color = default_color;
 
     Sphere() {}
     Sphere(const std::vector<glm::vec3> &points, ShaderProgram &&shader);
@@ -80,8 +80,7 @@ public:
     void UpdateSphereShape();
     void UpdateSphereBaseColor();
 
-    void AddRotation(unsigned int ind);
-    void UpdateRotation(unsigned int ind, bool rotation_changed, bool color_changed);
+    void UpdateRotation(unsigned int ind, bool rotation_changed, bool color_changed, bool visibility_changed);
 
     void Draw() const;
 };
