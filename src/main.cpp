@@ -111,6 +111,15 @@ static void TryUpdateClip()
     }
 }
 
+static float GetPeriodicValue(float value, float period)
+{
+    if (std::fabs(value) < period)
+        return value;
+
+    return value > 0 ? value - period * std::floor(value / period)
+                     : value + period * std::floor(std::fabs(value) / period);
+}
+
 static std::pair<bool, bool> DisplayRotationContent(Rotation &rotation, const std::string &id)
 {
     std::pair<bool, bool> changed = {false, false};
@@ -122,8 +131,7 @@ static std::pair<bool, bool> DisplayRotationContent(Rotation &rotation, const st
     ImGui::SameLine(); 
     if (ImGui::InputFloat(angle_label.c_str(), &rotation.Angle, 0.1f, 1.0f, "%.2f"))
     {
-        rotation.Angle = std::max(rotation.Angle, -360.0f);
-        rotation.Angle = std::min(rotation.Angle, 360.0f);
+        rotation.Angle = GetPeriodicValue(rotation.Angle, 360.0f);
         changed.first = true;
     }
 
