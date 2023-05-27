@@ -166,6 +166,7 @@ int main()
 
         ui.BeginFrame();
         ui.DrawPropertiesWindow();
+        ui.DrawRotationsResultsWindow();
 
         sphere.Draw();
         

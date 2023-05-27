@@ -27,4 +27,5 @@ public:
     void BeginFrame();
     void EndFrame();
     void DrawPropertiesWindow();
+    void DrawRotationsResultsWindow();
 };

@@ -1,4 +1,10 @@
 #include <vector>
+#include <string>
+
+#include "glm/vec4.hpp"
+#define IM_VEC4_CLASS_EXTRA \
+        constexpr ImVec4(const glm::vec4& f) : x(f.x), y(f.y), z(f.z), w(f.w) {} \
+        operator glm::vec4() const { return glm::vec4(x,y,z,w); }
 
 #include "glad/gl.h"
 #include "imgui.h"
@@ -69,6 +75,43 @@ void UI::DrawPropertiesWindow()
 
     for (unsigned int i = 0; i < Rotation::Max_children; i++)
         DisplayRotationNode(i);
+
+    ImGui::End();
+}
+
+static bool stylezed_text = true;
+
+void UI::DrawRotationsResultsWindow()
+{
+    if (!ImGui::Begin("##RotationsResultsWindow"))
+    {
+        ImGui::End();
+        return;
+    }
+
+    ImGui::Checkbox("Use Stylized Text", &stylezed_text);
+
+    // Изначальные точки сферы
+    bool opened = ImGui::TreeNodeEx("##BasePoints", ImGuiTreeNodeFlags_OpenOnArrow);
+    ImGui::SameLine();
+    if (stylezed_text)
+        ImGui::PushStyleColor(ImGuiCol_Text, glm::vec4(_sphere->Base_color, 1.0f));
+    ImGui::Text("Base Points");
+    if (opened)
+    {
+        for (int i = 0; i < _sphere->BasePoints().size(); i++)
+        {
+            glm::vec3 point = _sphere->BasePoints()[i];
+            ImGui::Text("(%.4f, %.4f, %.4f)", point.x, point.y, point.z);
+        }
+        ImGui::TreePop();
+    }
+    if (stylezed_text)
+        ImGui::PopStyleColor();
+    
+    ImGui::Separator();
+
+    // Точки, полученные из поворотов
 
     ImGui::End();
 }
