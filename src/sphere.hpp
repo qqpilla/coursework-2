@@ -52,7 +52,7 @@ private:
     unsigned int _coords_VBO;    // Содержит координаты _base_points
     unsigned int _colors_VBO;    // Содержит цвет сферы и цвета всех поворотов
     unsigned int _rotations_VBO; // Содержит матрицы 3x3, задающие повороты (для сферы содержит единичную матрицу в качестве матрицы поворота)
-    unsigned int _visibles_VBO;  // Содержит значения члена Is_visible поворотов (для сферы это всегда 1)
+    unsigned int _visibles_VBO;  // Содержит значения члена Is_visible поворотов и сферы
 
 
     void SetUpRendering();
@@ -72,8 +72,9 @@ public:
     Sphere(unsigned int level_of_detail, ShaderProgram &&shader);
 
     const std::vector<std::pair<Rotation, int>>& Rotations() const { return _rotations; }
-    Rotation& RotationByIndex(unsigned int ind) { return _rotations[ind].first; } // Позволяет изменить поворот, но не структуру вектора _rotations
+    const std::vector<glm::vec3>& BasePoints() const { return _base_points; }
     int MaxDetailLevel() const { return int(_max_detail_level); }
+    Rotation& RotationByIndex(unsigned int ind) { return _rotations[ind].first; } // Позволяет изменить поворот, но не структуру вектора _rotations
     
     void ChangeVisibility(bool should_affect_rotations);
 
