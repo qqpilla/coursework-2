@@ -6,6 +6,7 @@ set(sources
     ./src/shader_program.cpp
     ./src/camera.cpp
     ./src/sphere.cpp
+    ./src/ui.cpp
 )
 
 add_subdirectory(./external/glfw)
