@@ -1,8 +1,12 @@
+#include <vector>
+
 #include "glad/gl.h"
 #include "imgui.h"
 #include "backends/imgui_impl_opengl3.h"
 #include "backends/imgui_impl_glfw.h"
 #include "glm/gtc/type_ptr.hpp"
+#include "glm/vec3.hpp"
+#include "glm/mat3x3.hpp"
 
 #include "ui.hpp"
 #include "sphere.hpp"
@@ -14,6 +18,9 @@ UI::UI(Sphere* sphere, GLFWwindow *window, const char *glsl_version) : _sphere(s
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init(glsl_version);
     ImGui::StyleColorsDark();
+
+    _rotations_points.resize(Rotation::MaxRotations());
+    std::fill(_rotations_points.begin(), _rotations_points.end(), _sphere->BasePoints());
 }
 
 void UI::Die()
@@ -48,7 +55,10 @@ void UI::DrawPropertiesWindow()
 
     ImGui::Text("SPHERE PROPERTIES:");
     if(_sphere->Detail_level && ImGui::SliderInt("Level of Detail", &(_sphere->Detail_level), 1, _sphere->MaxDetailLevel()))
+    {
         _sphere->UpdateSphereShape();
+        UpdateLevelOfDetail();
+    }
     if (ImGui::ColorEdit3("Base Color", glm::value_ptr(_sphere->Base_color)))
         _sphere->UpdateSphereBaseColor();
     if (ImGui::Checkbox("Visible", &_sphere->Is_visible))
@@ -126,4 +136,38 @@ void UI::TryApplyChanges(const std::tuple<bool, bool, std::pair<bool, bool>> &ch
         return;
 
     _sphere->UpdateRotation(rotation_ind, std::get<0>(changes), std::get<1>(changes), std::get<2>(changes));
+    if (std::get<0>(changes))
+        UpdateRotationPoints(rotation_ind);
+}
+
+void UI::UpdateLevelOfDetail()
+{
+    std::fill(_rotations_points.begin(), _rotations_points.end(), _sphere->BasePoints());
+    for (int i = 0; i < _rotations_points.size(); i++)
+    {
+        Rotation rotation = _sphere->RotationByIndex(i);
+        
+        if (rotation.Angle == 0.0f && rotation.ParentMatrix() == glm::mat3(1.0f))
+        {
+            continue;
+        }
+        else
+        {
+            glm::mat3 rotation_matrix = glm::mat3(glm::rotate(glm::mat4(1.0f), glm::radians(rotation.Angle), glm::normalize(rotation.Axis))) * rotation.ParentMatrix();
+            for (int j = 0; j < _rotations_points[i].size(); j++)
+                _rotations_points[i][j] = rotation_matrix * _sphere->BasePoints()[j];
+        }
+    }
+}
+
+void UI::UpdateRotationPoints(unsigned int ind)
+{
+    Rotation rotation = _sphere->RotationByIndex(ind);
+    glm::mat3 rotation_matrix = glm::mat3(glm::rotate(glm::mat4(1.0f), glm::radians(rotation.Angle), glm::normalize(rotation.Axis))) * rotation.ParentMatrix();
+    for (int i = 0; i < _rotations_points[ind].size(); i++)
+        _rotations_points[ind][i] = rotation_matrix * _sphere->BasePoints()[i];
+
+    if (_sphere->Rotations()[ind].second != -1)
+        for (int i = 0; i < Rotation::Max_children; i++)
+            UpdateRotationPoints(_sphere->Rotations()[ind].second + i);
 }
