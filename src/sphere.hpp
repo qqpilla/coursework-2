@@ -20,6 +20,8 @@ public:
     glm::vec3 Color = default_color;
     bool Is_visible = false;
 
+    const glm::mat3& ParentMatrix() const { return _parent_matrix; }
+
     static const unsigned int Max_depth = 2;
     static const unsigned int Max_children = 3;
 
