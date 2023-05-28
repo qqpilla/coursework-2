@@ -24,6 +24,8 @@ UI::UI(Sphere* sphere, GLFWwindow *window, const char *glsl_version) : _sphere(s
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init(glsl_version);
     ImGui::StyleColorsDark();
+    ImGuiIO& io = ImGui::GetIO();
+    io.Fonts->AddFontFromFileTTF("../arial.ttf", 20, NULL, io.Fonts->GetGlyphRangesCyrillic());
 
     _rotations_points.resize(Rotation::MaxRotations());
     std::fill(_rotations_points.begin(), _rotations_points.end(), _sphere->BasePoints());
@@ -59,19 +61,19 @@ void UI::DrawPropertiesWindow()
         return;
     }
 
-    ImGui::Text("SPHERE PROPERTIES:");
-    if(_sphere->Detail_level && ImGui::SliderInt("Level of Detail", &(_sphere->Detail_level), 1, _sphere->MaxDetailLevel()))
+    ImGui::Text(u8"Свойства сферы:");
+    if(_sphere->Detail_level && ImGui::SliderInt(u8"Уровень детализации", &(_sphere->Detail_level), 1, _sphere->MaxDetailLevel()))
     {
         _sphere->UpdateSphereShape();
         UpdateLevelOfDetail();
     }
-    if (ImGui::ColorEdit3("Base Color", glm::value_ptr(_sphere->Base_color)))
+    if (ImGui::ColorEdit3(u8"Цвет", glm::value_ptr(_sphere->Base_color)))
         _sphere->UpdateSphereBaseColor();
-    if (ImGui::Checkbox("Visible", &_sphere->Is_visible))
+    if (ImGui::Checkbox(u8"Видима", &_sphere->Is_visible))
         _sphere->ChangeVisibility(ImGui::GetIO().KeyCtrl);
 
     ImGui::Separator();
-    ImGui::Text("ROTATIONS:");
+    ImGui::Text(u8"Повороты:");
 
     for (unsigned int i = 0; i < Rotation::Max_children; i++)
         DisplayRotationNode(i);
@@ -89,7 +91,7 @@ void UI::DrawRotationsResultsWindow()
         return;
     }
 
-    ImGui::Checkbox("Use Stylized Text", &stylized_text);
+    ImGui::Checkbox(u8"Использовать стилизованный текст", &stylized_text);
 
     // Изначальные точки сферы
     bool opened = ImGui::TreeNodeEx("##BasePoints", ImGuiTreeNodeFlags_OpenOnArrow);
@@ -98,7 +100,7 @@ void UI::DrawRotationsResultsWindow()
         ImGui::PushStyleColor(ImGuiCol_Text, glm::vec4(_sphere->Base_color, 1.0f));
     else
         ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_Text]);
-    ImGui::Text("Base Points");
+    ImGui::Text(u8"Изначальные точки сферы");
 
     if (opened)
     {
@@ -115,7 +117,7 @@ void UI::DrawRotationsResultsWindow()
 
     // Точки, полученные из поворотов
     for (int i = 0; i < Rotation::Max_children; i++)
-        DisplayRotationPointsNode(i, "Rotation " + std::to_string(i + 1));
+        DisplayRotationPointsNode(i, u8"Поворот " + std::to_string(i + 1));
 
     ImGui::End();
 }
@@ -222,16 +224,18 @@ std::tuple<bool, bool, std::pair<bool, bool>> UI::DisplayRotationContent(Rotatio
 {
     std::tuple<bool, bool, std::pair<bool, bool>> changed = {false, false, {false, false}};
 
-    std::string angle_label = "Angle##" + id;
-    std::string axis_label = "Axis Vector##" + id;
-    std::string color_label = "Color##" + id;
-    std::string visible_label = "Visible##" + id; 
+    std::string angle_label = u8"Угол##" + id;
+    std::string axis_label = u8"Ось вращения##" + id;
+    std::string color_label = u8"Цвет##" + id;
+    std::string visible_label = u8"Видимый##" + id; 
 
-    ImGui::SameLine(); 
+    ImGui::SameLine();
+    ImGui::SetNextItemWidth(130.0f);
     if (std::get<0>(changed) = ImGui::InputFloat(angle_label.c_str(), &rotation.Angle, 0.1f, 1.0f, "%.2f"))
         rotation.Angle = GetPeriodicValue(rotation.Angle, 360.0f);
 
     ImGui::SameLine(); 
+    ImGui::SetNextItemWidth(200.0f);
     std::get<0>(changed) = ImGui::InputFloat3(axis_label.c_str(), glm::value_ptr(rotation.Axis), "%.2f") || std::get<0>(changed);
 
     ImGui::SameLine(); 
