@@ -79,7 +79,7 @@ void UI::DrawPropertiesWindow()
     ImGui::End();
 }
 
-static bool stylezed_text = true;
+static bool stylized_text = true;
 
 void UI::DrawRotationsResultsWindow()
 {
@@ -89,14 +89,17 @@ void UI::DrawRotationsResultsWindow()
         return;
     }
 
-    ImGui::Checkbox("Use Stylized Text", &stylezed_text);
+    ImGui::Checkbox("Use Stylized Text", &stylized_text);
 
     // Изначальные точки сферы
     bool opened = ImGui::TreeNodeEx("##BasePoints", ImGuiTreeNodeFlags_OpenOnArrow);
     ImGui::SameLine();
-    if (stylezed_text)
+    if (stylized_text)
         ImGui::PushStyleColor(ImGuiCol_Text, glm::vec4(_sphere->Base_color, 1.0f));
+    else
+        ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_Text]);
     ImGui::Text("Base Points");
+
     if (opened)
     {
         for (int i = 0; i < _sphere->BasePoints().size(); i++)
@@ -106,14 +109,82 @@ void UI::DrawRotationsResultsWindow()
         }
         ImGui::TreePop();
     }
-    if (stylezed_text)
-        ImGui::PopStyleColor();
-    
+
+    ImGui::PopStyleColor();
     ImGui::Separator();
 
     // Точки, полученные из поворотов
+    for (int i = 0; i < Rotation::Max_children; i++)
+        DisplayRotationPointsNode(i, "Rotation " + std::to_string(i + 1));
 
     ImGui::End();
+}
+
+void UI::DisplayRotationPointsNode(unsigned int ind, std::string label, int prev_ind)
+{
+    if (prev_ind != -1)
+        ImGui::Indent();
+
+    std::string id = "##Node" + std::to_string(ind);
+    bool opened = ImGui::TreeNodeEx(id.c_str(), ImGuiTreeNodeFlags_OpenOnArrow);
+    ImGui::SameLine();
+
+    glm::vec4 default_text_color = ImGui::GetStyle().Colors[ImGuiCol_Text];
+    if (stylized_text)
+        ImGui::PushStyleColor(ImGuiCol_Text, glm::vec4(_sphere->RotationByIndex(ind).Color, 1.0f));
+    else
+        ImGui::PushStyleColor(ImGuiCol_Text, default_text_color);
+
+    ImGui::Text(label.c_str());
+    ImGui::PopStyleColor();
+
+    if (opened)
+    {
+        for (int i = 0; i < _rotations_points[ind].size(); i++)
+        {
+            if (stylized_text)
+            {
+                ImGui::PushStyleColor(ImGuiCol_Text, glm::vec4(_sphere->RotationByIndex(ind).Color, 1.0f));
+                ImGui::PushStyleColor(ImGuiCol_Text, default_text_color);
+                if (prev_ind == -1)
+                    ImGui::PushStyleColor(ImGuiCol_Text, glm::vec4(_sphere->Base_color, 1.0f));
+                else
+                    ImGui::PushStyleColor(ImGuiCol_Text, glm::vec4(_sphere->RotationByIndex(prev_ind).Color, 1.0f));
+            }
+            else
+            {
+                ImGui::PushStyleColor(ImGuiCol_Text, default_text_color);
+                ImGui::PushStyleColor(ImGuiCol_Text, default_text_color);
+                ImGui::PushStyleColor(ImGuiCol_Text, default_text_color);
+            }
+
+            glm::vec3 parent = (prev_ind == -1) ? _sphere->BasePoints()[i] : _rotations_points[prev_ind][i];
+            glm::vec3 child = _rotations_points[ind][i];
+            ImGui::Text("(%.4f, %.4f, %.4f)", parent.x, parent.y, parent.z); 
+            ImGui::PopStyleColor();
+            ImGui::SameLine(); 
+            ImGui::Text(" ---> ");
+            ImGui::PopStyleColor();
+            ImGui::SameLine(); 
+            ImGui::Text("(%.4f, %.4f, %.4f)", child.x, child.y, child.z);
+            ImGui::PopStyleColor();
+        }
+
+        ImGui::TreePop();
+    }
+
+    unsigned int first_child = _sphere->Rotations()[ind].second;
+    if (first_child != -1)
+    {
+        for (int i = 0; i < Rotation::Max_children; i++)
+        {
+            std::string child_label = label + '.' + std::to_string(i + 1);
+            DisplayRotationPointsNode(first_child + i, child_label, ind);
+        }
+    }
+
+    if (prev_ind != -1)
+        ImGui::Unindent();
 }
 
 void UI::DisplayRotationNode(unsigned int ind)
