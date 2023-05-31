@@ -8,7 +8,7 @@
 
 #include "shader_program.hpp"
 
-static glm::vec3 default_color = glm::vec3(0.2f, 0.2f, 0.2f);
+static const glm::vec3 default_color = glm::vec3(0.2f, 0.2f, 0.2f);
 
 struct Rotation
 {
