@@ -7,6 +7,7 @@
 #include "sphere.hpp"
 #include "camera.hpp"
 #include "ui.hpp"
+#include "dirs.hpp"
 
 static const char *glsl_version = "#version 330";
 
@@ -110,6 +111,8 @@ static void TryUpdateClip()
 
 int main()
 {
+    setlocale(LC_ALL, "ru_RU.utf8");
+
     glfwSetErrorCallback(ErrorCallback);
 
     if (!glfwInit())
@@ -154,7 +157,7 @@ int main()
     Camera::UpdateProjectionMatrix(width, height);
     Camera::UpdatePosition();
 
-    sphere = Sphere(30, {"../shaders/sphere.vert", "../shaders/sphere.frag"});
+    sphere = Sphere(30, {SHADERS_DIR "/sphere.vert", SHADERS_DIR "/sphere.frag"});
     sphere.SetCameraDistanceU(Camera::Distance());
     UI ui(&sphere, window, glsl_version);
 

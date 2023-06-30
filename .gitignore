@@ -39,3 +39,6 @@ build
 
 # CMake files
 CMakePresets.json
+
+# Cmake configured files
+dirs.hpp

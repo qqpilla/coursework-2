@@ -1,0 +1,9 @@
+#pragma once
+
+#ifndef SHADERS_DIR
+#define SHADERS_DIR "@CMAKE_SOURCE_DIR@/shaders"
+#endif
+
+#ifndef FONT_DIR
+#define FONT_DIR "@CMAKE_SOURCE_DIR@"
+#endif
