@@ -1,8 +1,10 @@
 #include <iostream>
+#include <fstream>
 
 #include "glad/gl.h"
 #include "GLFW/glfw3.h"
 #include "glm/vec2.hpp"
+#include "glm/vec3.hpp"
 
 #include "sphere.hpp"
 #include "camera.hpp"
@@ -109,6 +111,18 @@ static void TryUpdateClip()
     }
 }
 
+std::vector<glm::vec3> ReadPoints(std::ifstream &ifstr)
+{
+    std::size_t count;
+    ifstr >> count;
+    
+    std::vector<glm::vec3> data(count);
+    for (int i = 0; i < count; i++)
+        ifstr >> data[i].x >> data[i].y >> data[i].z;
+
+    return data;
+}
+
 int main()
 {
     setlocale(LC_ALL, "ru_RU.utf8");
@@ -157,7 +171,12 @@ int main()
     Camera::UpdateProjectionMatrix(width, height);
     Camera::UpdatePosition();
 
-    sphere = Sphere(30, {SHADERS_DIR "/sphere.vert", SHADERS_DIR "/sphere.frag"});
+    std::ifstream input_points(INPUT_DIR "/input.txt");
+    sphere = input_points.is_open() ? 
+        Sphere(ReadPoints(input_points), {SHADERS_DIR "/sphere.vert", SHADERS_DIR "/sphere.frag"}) : 
+        Sphere(30, {SHADERS_DIR "/sphere.vert", SHADERS_DIR "/sphere.frag"});
+    input_points.close();
+
     sphere.SetCameraDistanceU(Camera::Distance());
     UI ui(&sphere, window, glsl_version);
 

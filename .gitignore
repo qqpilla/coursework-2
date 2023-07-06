@@ -42,3 +42,6 @@ CMakePresets.json
 
 # Cmake configured files
 dirs.hpp
+
+# Input files
+input.txt

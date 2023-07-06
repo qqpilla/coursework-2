@@ -7,3 +7,7 @@
 #ifndef FONT_DIR
 #define FONT_DIR "@CMAKE_SOURCE_DIR@"
 #endif
+
+#ifndef INPUT_DIR
+#define INPUT_DIR "@CMAKE_SOURCE_DIR@"
+#endif
